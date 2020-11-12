@@ -1,0 +1,46 @@
+syntax = "proto3";
+
+//是否运行生成多个java文件
+option java_multiple_files = true;
+option java_package = "grpc.sample";
+//生成的java类名字
+option java_outer_classname = "TestProto";
+option objc_class_prefix = "HLW";
+
+package Test;
+import "google/protobuf/timestamp.proto";
+//import "google/protobuf/duration.proto";
+
+message PagedList_PhoneNumber {
+  repeated PhoneNumber Data = 1;
+  int32 PageSize = 2;
+  int32 PageIndex = 3;
+}
+message PhoneNumber {
+  string Number = 1;
+  PhoneType Type = 2;
+}
+enum PhoneType {
+  Mobile = 0;
+  Home = 1;
+  Work = 2;
+}
+message UserReq {
+  string Name = 1;
+}
+message UserResp{
+  string Name = 1;
+  int32 Age = 2;
+  bytes File = 3;
+  .google.protobuf.Timestamp Birthday = 4;
+  //  .google.protobuf.Duration TimeSpan = 5;
+  string Id = 6; // default value could not be applied: 00000000-0000-0000-0000-000000000000
+  PagedList_PhoneNumber Phones = 7;
+  bool Enable = 8;
+}
+service UserService {
+  rpc GetUser (UserReq) returns (UserResp);
+  rpc GetAccount (UserReq) returns (PhoneNumber);  //其他方法
+  rpc GetPhoneNumber (PhoneNumber) returns (PhoneNumber);//其他方法
+  rpc Test (stream UserReq) returns (stream UserResp);
+}
