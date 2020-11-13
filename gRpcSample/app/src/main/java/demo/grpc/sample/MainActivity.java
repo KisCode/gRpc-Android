@@ -7,11 +7,8 @@ import android.widget.Toast;
 
 import androidx.appcompat.app.AppCompatActivity;
 
-import java.lang.reflect.InvocationHandler;
-import java.lang.reflect.Method;
-import java.lang.reflect.Proxy;
-
-import demo.grpc.sample.core.GRpcRequest;
+import demo.grpc.sample.api.GRpcApi;
+import demo.grpc.sample.core.RPCMananger;
 import demo.grpc.sample.core.RpcRequest;
 import demo.grpc.sample.interceptor.HeaderClientInterceptor;
 import grpc.sample.UserReq;
@@ -290,18 +287,44 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         streamObserver.onCompleted();
     }
 
-    private void test() {
-        GRpcRequest rpcRequest = (GRpcRequest) Proxy.newProxyInstance(GRpcRequest.class.getClassLoader(), new Class[]{GRpcRequest.class}, new InvocationHandler() {
+    private void test() {/*
+        GRpcApi rpcRequest = (GRpcApi) Proxy.newProxyInstance(GRpcApi.class.getClassLoader(), new Class[]{GRpcApi.class}, new InvocationHandler() {
             @Override
             public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
-                Log.i(TAG, method.getName() + "\t" + args.length + "\t" + args[0].toString());
+                Log.i(TAG, proxy.getClass() + "\t" + args.length + "\t" + args[0].toString());
                 // 1. invoke执行方法
                 //2. 根据返回值类型进行转换
-                return null;
+
+                //获取该方法上的注解
+                GrpcAnnotaion annotation = method.getAnnotation(GrpcAnnotaion.class);
+                Log.i(TAG, method.getName() + "\t" + annotation.className() + "." + annotation.methodName());
+
+                Class aClass = annotation.className();
+                String staticMethod = "newBlockingStub";
+                Method newBlockingStubMethod = aClass.getMethod(staticMethod, Channel.class);
+                Object stub = newBlockingStubMethod.invoke(null, RPCMananger.getChannel());
+                Log.i(TAG, "newBlockingStub:" + stub.getClass());
+
+                String methodName = annotation.methodName();
+                Class<?>[] parameterTypes = new Class<?>[args.length];
+                for (int i = 0; i < args.length; i++) {
+                    parameterTypes[i] = args[i].getClass();
+                    Log.i(TAG, "parameterTypes:" + parameterTypes[i]);
+                }
+                Method realMethod = stub.getClass().getMethod(methodName, parameterTypes);
+                Log.i(TAG, "realMethod:" + realMethod.getName());
+                return realMethod.invoke(stub, args);
             }
         });
 
         UserReq userReq = UserReq.newBuilder().setName("Android").build();
-        rpcRequest.getUser2(userReq);
+        UserResp userResp = rpcRequest.getUser(userReq);
+        Log.i(TAG, "success ：" + userResp.getName());*/
+
+        //初始化请求参数
+        UserReq userReq = UserReq.newBuilder().setName("Android").build();
+        //发起请求
+        UserResp userResp = RPCMananger.create(GRpcApi.class).getUser(userReq);
+        Log.i(TAG, "success ：" + userResp.getName());
     }
 }

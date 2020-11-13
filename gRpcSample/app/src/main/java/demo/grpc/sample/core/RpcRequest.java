@@ -1,7 +1,5 @@
 package demo.grpc.sample.core;
 
-import java.lang.reflect.Proxy;
-
 import grpc.sample.UserReq;
 import grpc.sample.UserResp;
 import grpc.sample.UserServiceGrpc;
@@ -27,23 +25,6 @@ public class RpcRequest {
         return null;
     }
 
-    public static <T> Observable<ReturnWrapper<T>> getObservable(final UserReq userReq) {
-        return Observable.create(new ObservableOnSubscribe<ReturnWrapper<T>>() {
-            @Override
-            public void subscribe(ObservableEmitter<ReturnWrapper<T>> emitter) throws Exception {
-                UserServiceGrpc.UserServiceBlockingStub stub = UserServiceGrpc.newBlockingStub(RPCMananger.getChannel());
-
-                try {
-                    UserResp response = stub.getUser(userReq);
-
-                    emitter.onNext(new ReturnWrapper<T>((T) response));
-                } catch (Exception ex) {
-                    emitter.onError(ex);
-                }
-            }
-        });
-    }
-
     public static Observable<UserResp> getUser(final UserReq userReq) {
 
         return Observable.create(new ObservableOnSubscribe<UserResp>() {
@@ -60,7 +41,7 @@ public class RpcRequest {
         });
     }
 
-    public  Observable<UserResp> getUser2(final UserReq userReq) {
+    public Observable<UserResp> getUser2(final UserReq userReq) {
 
         return Observable.create(new ObservableOnSubscribe<UserResp>() {
             @Override
