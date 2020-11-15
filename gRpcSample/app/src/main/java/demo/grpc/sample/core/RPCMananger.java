@@ -1,8 +1,11 @@
 package demo.grpc.sample.core;
 
+import android.util.Log;
+
 import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.Method;
 import java.lang.reflect.Proxy;
+import java.util.HashMap;
 
 import demo.grpc.sample.annotation.GrpcAnnotaion;
 import demo.grpc.sample.interceptor.HeaderClientInterceptor;
@@ -19,7 +22,16 @@ import io.grpc.ManagedChannelBuilder;
 public class RPCMananger {
     private static final String TAG = "RPCMananger";
 
-    public static <T> T create(Class<T> service) {
+    private String baseUrl;
+    private HeaderFactory headerFactory;
+
+    public RPCMananger(String baseUrl, HeaderFactory headerFactory) {
+        this.baseUrl = baseUrl;
+        this.headerFactory = headerFactory;
+    }
+
+    @SuppressWarnings("unchecked")
+    public <T> T create(Class<T> service) {
         if (!service.isInterface()) {
             throw new IllegalArgumentException("API declarations must be interfaces.");
         }
@@ -37,13 +49,18 @@ public class RPCMananger {
 
                 //获取该方法上的注解
                 GrpcAnnotaion annotation = method.getAnnotation(GrpcAnnotaion.class);
+                if (annotation == null) {
+                    throw new IllegalAccessException("API method not found GrpcAnnotaion annotaion");
+                }
 
 //                Log.i(TAG, method.getName() + "\t" + annotation.className() + "." + annotation.methodName());
 
                 Class aClass = annotation.className();
                 String staticMethod = "newBlockingStub";
+
                 Method newBlockingStubMethod = aClass.getMethod(staticMethod, Channel.class);
-                Object stub = newBlockingStubMethod.invoke(null, RPCMananger.getChannel());
+                //工厂方法 获取Channel
+                Object stub = newBlockingStubMethod.invoke(null, getChannel(baseUrl, headerFactory.createHeaders()));
 //                Log.i(TAG, "newBlockingStub:" + stub.getClass());
 
                 String methodName = annotation.methodName();
@@ -53,17 +70,37 @@ public class RPCMananger {
 //                    Log.i(TAG, "parameterTypes:" + parameterTypes[i]);
                 }
                 Method realMethod = stub.getClass().getMethod(methodName, parameterTypes);
-//                Log.i(TAG, "realMethod:" + realMethod.getName());
+                Log.i(TAG, "realMethod:" + realMethod.getName());
                 return realMethod.invoke(stub, args);
             }
         });
     }
 
-    public static Channel getChannel() {
-        ManagedChannel managedChannel = ManagedChannelBuilder.forTarget("grpctest.test.rlair.net")
+    public static final class Builder {
+        private String baseUrl;
+        private HeaderFactory headerFactory;
+
+        public Builder setBaseUrl(String baseUrl) {
+            this.baseUrl = baseUrl;
+            return this;
+        }
+
+        public Builder setHeaderFactory(HeaderFactory headerFactory) {
+            this.headerFactory = headerFactory;
+            return this;
+        }
+
+        public RPCMananger build() {
+            return new RPCMananger(baseUrl, headerFactory);
+        }
+    }
+
+    public Channel getChannel(String baseUrl, HashMap<String, String> headers) {
+        ManagedChannel managedChannel = ManagedChannelBuilder.forTarget(baseUrl)
                 .useTransportSecurity()
                 .build();
-        HeaderClientInterceptor headerClientInterceptor = new HeaderClientInterceptor("Authorization", "Bearer eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJFZmIiLCJodHRwOi8vc2NoZW1hcy54bWxzb2FwLm9yZy93cy8yMDA1LzA1L2lkZW50aXR5L2NsYWltcy9uYW1lIjoibGlob25namlhbmciLCJqdGkiOiIyZTI4YWRiMi04ZTcwLTRjMjYtYjJhNS1hMjc0MTA2NDNmMTgiLCJpYXQiOiIxNjA1MjMyOTA4IiwibmJmIjoxNjA1MjMyOTA4LCJleHAiOjE2MDUyNzYxMDgsImlzcyI6ImVmYi5ybGFpci5uZXQiLCJhdWQiOiJFZmIifQ.FS9-S8stYBHHHPUV9mgzFUbsXjhsJMrfbgzCFrd_QFgeM6AO5EANCCsBMu8JbdaIxNV1FLufpdvZdyFpgqpMV9UFlY_0pdGyPVsByiWqgdZ2VkGeOy5YfL7wIG4KORlhZTLOqoA2-MNTjt0DkrY1Ex0AZPbhpe-VNdWXENqOJ0M2bgV9msd9llyozR_gKYjnSMnpwQDup4RRHRbZrEFYA5_rny_MKKEsKN2xe2IhEicXm1W3Q-g68vjfwCYphsUIwmCsiSVnY4sIEadIaDfI6lsWRUmNB518sqjAlpEcLJHQJ1yFtol-P5tDmlshYqB_q2-Q7pnjqqqypALac6PEYw");
+        //抽象方法
+        HeaderClientInterceptor headerClientInterceptor = new HeaderClientInterceptor(headers);
         Channel channel = ClientInterceptors.intercept(managedChannel, headerClientInterceptor);
         return channel;
     }

@@ -17,9 +17,9 @@ import java.lang.annotation.Target;
  * Date : 2020/9/3 21:25
  **/
 @Target(ElementType.METHOD)
-@Retention(RetentionPolicy.CLASS)
+@Retention(RetentionPolicy.RUNTIME)
 public @interface GrpcAnnotaion {
-    Class className();
+    Class<?> className();
 
     String methodName();
 } 
