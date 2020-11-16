@@ -10,6 +10,7 @@ import androidx.appcompat.app.AppCompatActivity;
 import demo.grpc.sample.api.GRpcApi;
 import demo.grpc.sample.core.RPCMananger;
 import demo.grpc.sample.core.RpcRequest;
+import demo.grpc.sample.core.header.OAHeaderFactory;
 import demo.grpc.sample.interceptor.HeaderClientInterceptor;
 import grpc.sample.UserReq;
 import grpc.sample.UserResp;
@@ -29,6 +30,8 @@ import io.reactivex.disposables.CompositeDisposable;
 import io.reactivex.disposables.Disposable;
 import io.reactivex.functions.Consumer;
 import io.reactivex.schedulers.Schedulers;
+import retrofit2.Retrofit;
+import retrofit2.adapter.rxjava.RxJavaCallAdapterFactory;
 
 /***
  * https://github.com/xuexiangjys/Protobuf-gRPC-Android/blob/master/app/src/main/java/com/xuexiang/protobufdemo/grpc/HttpsUtils.java
@@ -86,7 +89,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         new Thread(new Runnable() {
             @Override
             public void run() {
-                ManagedChannel channel = ManagedChannelBuilder.forTarget("grpctest.test.rlair.net")
+                ManagedChannel channel = ManagedChannelBuilder.forTarget("grpctest.keno.com")
                         .useTransportSecurity()
                         .build();
                 UserServiceGrpc.UserServiceBlockingStub stub = UserServiceGrpc.newBlockingStub(channel);
@@ -116,7 +119,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         new Thread(new Runnable() {
             @Override
             public void run() {
-                ManagedChannel managedChannel = ManagedChannelBuilder.forTarget("grpctest.test.rlair.net")
+                ManagedChannel managedChannel = ManagedChannelBuilder.forTarget("grpctest.keno.com")
                         .useTransportSecurity()
                         .build();
                 HeaderClientInterceptor headerClientInterceptor = new HeaderClientInterceptor("Authorization", "Bearer eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJFZmIiLCJodHRwOi8vc2NoZW1hcy54bWxzb2FwLm9yZy93cy8yMDA1LzA1L2lkZW50aXR5L2NsYWltcy9uYW1lIjoibGlob25namlhbmciLCJqdGkiOiJjNGUxMmIwOS00MGU4LTQ0YmQtYWU2MC01MWNlYjBlNjM4ZDAiLCJpYXQiOiIxNjA1MDYzODM1IiwibmJmIjoxNjA1MDYzODM1LCJleHAiOjE2MDUxMDcwMzUsImlzcyI6ImVmYi5ybGFpci5uZXQiLCJhdWQiOiJFZmIifQ.09Iqs031U4XdkaXzsKXI41JrVmepCicfgKWX9H_Fy0f1PMnJKb8TkI1LS8Z0sDKqRRNE4uoYDk1dP1hHJpvFEEmTczsufc8b6dOXrAz5t1cJ5-SUJvaLf_6ZapDSkg7GHm0OcODYBu9jxKNVj0KjbUAQu_Q8Pbu_x-ETScFRtqiTwhTehwmQ_2oZe_426Q9tf79P4xBoFOlcT0pxXGJ8ViVX_7cIugaTxFpGuFiMp7rREOoj-qBkMxMdpHmxQnYeWN0tTvPSEBBXV10an7GwRULxMn7StLqX-diSJTQkivOJCB_G-7cRelQCjhp9zrUj2gcucHFeIlhtgEECHV00Lw");
@@ -149,7 +152,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             @Override
             public void subscribe(ObservableEmitter<UserResp> emitter) throws Exception {
                 Log.i(TAG, "subscribe in:" + Thread.currentThread().getName());
-                ManagedChannel managedChannel = ManagedChannelBuilder.forTarget("grpctest.test.rlair.net")
+                ManagedChannel managedChannel = ManagedChannelBuilder.forTarget("grpctest.keno.com")
                         .useTransportSecurity()
                         .build();
                 HeaderClientInterceptor headerClientInterceptor = new HeaderClientInterceptor("Authorization", "Bearer eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJFZmIiLCJodHRwOi8vc2NoZW1hcy54bWxzb2FwLm9yZy93cy8yMDA1LzA1L2lkZW50aXR5L2NsYWltcy9uYW1lIjoibGlob25namlhbmciLCJqdGkiOiJjNGUxMmIwOS00MGU4LTQ0YmQtYWU2MC01MWNlYjBlNjM4ZDAiLCJpYXQiOiIxNjA1MDYzODM1IiwibmJmIjoxNjA1MDYzODM1LCJleHAiOjE2MDUxMDcwMzUsImlzcyI6ImVmYi5ybGFpci5uZXQiLCJhdWQiOiJFZmIifQ.09Iqs031U4XdkaXzsKXI41JrVmepCicfgKWX9H_Fy0f1PMnJKb8TkI1LS8Z0sDKqRRNE4uoYDk1dP1hHJpvFEEmTczsufc8b6dOXrAz5t1cJ5-SUJvaLf_6ZapDSkg7GHm0OcODYBu9jxKNVj0KjbUAQu_Q8Pbu_x-ETScFRtqiTwhTehwmQ_2oZe_426Q9tf79P4xBoFOlcT0pxXGJ8ViVX_7cIugaTxFpGuFiMp7rREOoj-qBkMxMdpHmxQnYeWN0tTvPSEBBXV10an7GwRULxMn7StLqX-diSJTQkivOJCB_G-7cRelQCjhp9zrUj2gcucHFeIlhtgEECHV00Lw");
@@ -226,7 +229,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
     //异步访问
     private void requestAsycGRPC() {
-        final ManagedChannel channel = ManagedChannelBuilder.forTarget("grpctest.test.rlair.net")
+        final ManagedChannel channel = ManagedChannelBuilder.forTarget("grpctest.keno.com")
                 .useTransportSecurity()
                 .build();
         UserServiceGrpc.UserServiceStub stub = UserServiceGrpc.newStub(channel);
@@ -254,7 +257,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
 
     private void requestSingleStream() {
-        ManagedChannel managedChannel = ManagedChannelBuilder.forTarget("grpctest.test.rlair.net")
+        ManagedChannel managedChannel = ManagedChannelBuilder.forTarget("grpctest.keno.com")
                 .useTransportSecurity()
                 .build();
         HeaderClientInterceptor headerClientInterceptor = new HeaderClientInterceptor("Authorization", "Bearer eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJFZmIiLCJodHRwOi8vc2NoZW1hcy54bWxzb2FwLm9yZy93cy8yMDA1LzA1L2lkZW50aXR5L2NsYWltcy9uYW1lIjoibGlob25namlhbmciLCJqdGkiOiJjNGUxMmIwOS00MGU4LTQ0YmQtYWU2MC01MWNlYjBlNjM4ZDAiLCJpYXQiOiIxNjA1MDYzODM1IiwibmJmIjoxNjA1MDYzODM1LCJleHAiOjE2MDUxMDcwMzUsImlzcyI6ImVmYi5ybGFpci5uZXQiLCJhdWQiOiJFZmIifQ.09Iqs031U4XdkaXzsKXI41JrVmepCicfgKWX9H_Fy0f1PMnJKb8TkI1LS8Z0sDKqRRNE4uoYDk1dP1hHJpvFEEmTczsufc8b6dOXrAz5t1cJ5-SUJvaLf_6ZapDSkg7GHm0OcODYBu9jxKNVj0KjbUAQu_Q8Pbu_x-ETScFRtqiTwhTehwmQ_2oZe_426Q9tf79P4xBoFOlcT0pxXGJ8ViVX_7cIugaTxFpGuFiMp7rREOoj-qBkMxMdpHmxQnYeWN0tTvPSEBBXV10an7GwRULxMn7StLqX-diSJTQkivOJCB_G-7cRelQCjhp9zrUj2gcucHFeIlhtgEECHV00Lw");
@@ -324,7 +327,24 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         //初始化请求参数
         UserReq userReq = UserReq.newBuilder().setName("Android").build();
         //发起请求
-        UserResp userResp = RPCMananger.create(GRpcApi.class).getUser(userReq);
+
+        RPCMananger rpcMananger = new RPCMananger.Builder()
+                .setBaseUrl("grpctest.keno.com")
+                .setHeaderFactory(OAHeaderFactory.create())
+                .build();
+        GRpcApi gRpcApi = rpcMananger.create(GRpcApi.class);
+        UserResp userResp = gRpcApi.getUser(userReq);
         Log.i(TAG, "success ：" + userResp.getName());
+    }
+
+    private void testRetrofit() {
+        Retrofit retrofit = new Retrofit.Builder()
+                .baseUrl("http://fanyi.youdao.com/") //设置网络请求的Url地址
+//                .addConverterFactory(GsonConverterFactory.create()) //设置数据解析器
+                .addCallAdapterFactory(RxJavaCallAdapterFactory.create())
+                .build();
+
+        retrofit.create(GRpcApi.class)
+                .getUser(null);
     }
 }

@@ -6,6 +6,8 @@ import grpc.sample.UserServiceGrpc;
 import io.reactivex.Observable;
 import io.reactivex.ObservableEmitter;
 import io.reactivex.ObservableOnSubscribe;
+import retrofit2.adapter.rxjava.RxJavaCallAdapterFactory;
+import rx.Subscriber;
 
 /**
  * Description:
@@ -26,7 +28,6 @@ public class RpcRequest {
     }
 
     public static Observable<UserResp> getUser(final UserReq userReq) {
-
         return Observable.create(new ObservableOnSubscribe<UserResp>() {
             @Override
             public void subscribe(ObservableEmitter<UserResp> emitter) throws Exception {

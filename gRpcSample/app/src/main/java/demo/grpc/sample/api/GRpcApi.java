@@ -13,6 +13,7 @@ import grpc.sample.UserServiceGrpc;
  */
 
 public interface GRpcApi {
+
     @GrpcAnnotaion(className = UserServiceGrpc.class, methodName = "getUser")
     UserResp getUser(final UserReq userReq);
 }
