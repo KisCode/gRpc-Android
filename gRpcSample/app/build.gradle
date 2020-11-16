@@ -5,6 +5,7 @@ android {
     compileSdkVersion 29
 
     defaultConfig {
+        multiDexEnabled true
         applicationId "demo.grpc.sample"
         minSdkVersion 19
         targetSdkVersion 29
@@ -45,6 +46,7 @@ dependencies {
     implementation fileTree(dir: "libs", include: ["*.jar"])
     implementation 'androidx.appcompat:appcompat:1.2.0'
     implementation 'androidx.constraintlayout:constraintlayout:2.0.4'
+    implementation 'com.android.support:multidex:1.0.3'
 
     //gRpc
     implementation 'io.grpc:grpc-okhttp:1.33.0'
