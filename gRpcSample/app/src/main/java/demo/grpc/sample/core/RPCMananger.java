@@ -71,7 +71,8 @@ public class RPCMananger {
                 }
                 Method realMethod = stub.getClass().getMethod(methodName, parameterTypes);
                 Log.i(TAG, "realMethod:" + realMethod.getName());
-                return realMethod.invoke(stub, args);
+//                return realMethod.invoke(stub, args);
+                return "test";
             }
         });
     }
