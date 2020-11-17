@@ -270,18 +270,24 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 /*        UserResp userResp = gRpcApi.getUser(userReq);
         Log.i(TAG, "success ：" + userResp.getName());*/
 
-        String userString = gRpcApi.getUserString(userReq);
-        Log.i(TAG, "userStrin ：" + userString);
+/*        String userString = gRpcApi.getUserString(userReq);
+        Log.i(TAG, "userStrin ：" + userString)  ;*/
 
-//        Observable<UserResp> userObservable = gRpcApi.getUserObservable(userReq);
-//        userObservable.subscribeOn(Schedulers.io())
-//                .observeOn(AndroidSchedulers.mainThread())
-//                .subscribe(new Consumer<UserResp>() {
-//                    @Override
-//                    public void accept(UserResp userResp) throws Exception {
-//
-//                    }
-//                });
+        Observable<UserResp> userObservable = gRpcApi.getUserObservable(userReq);
+        userObservable.subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe(new Consumer<UserResp>() {
+                    @Override
+                    public void accept(UserResp userResp) throws Exception {
+                        Log.i(TAG, "userStrin ：" + userResp.getName());
+                    }
+                }, new Consumer<Throwable>() {
+                    @Override
+                    public void accept(Throwable throwable) throws Exception {
+                        Log.i(TAG, "throwable ：" + throwable.toString());
+                    }
+                });
+
     }
 
     private void testRetrofit() {

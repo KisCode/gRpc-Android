@@ -6,13 +6,19 @@ import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.Method;
 import java.lang.reflect.Proxy;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
+import java.util.Map;
 
 import demo.grpc.sample.annotation.GrpcAnnotaion;
 import demo.grpc.sample.interceptor.HeaderClientInterceptor;
+import grpc.sample.UserResp;
 import io.grpc.Channel;
 import io.grpc.ClientInterceptors;
 import io.grpc.ManagedChannel;
 import io.grpc.ManagedChannelBuilder;
+import io.reactivex.Observable;
+import io.reactivex.ObservableEmitter;
+import io.reactivex.ObservableOnSubscribe;
 
 /**
  * Description:
@@ -21,6 +27,7 @@ import io.grpc.ManagedChannelBuilder;
  **/
 public class RPCMananger {
     private static final String TAG = "RPCMananger";
+    private final Map<Method, ServiceMethod> serviceMethodCache = new LinkedHashMap<>();
 
     private String baseUrl;
     private HeaderFactory headerFactory;
@@ -42,10 +49,12 @@ public class RPCMananger {
 
         return (T) Proxy.newProxyInstance(service.getClassLoader(), new Class<?>[]{service}, new InvocationHandler() {
             @Override
-            public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
-//                Log.i(TAG, proxy.getClass() + "\t" + args.length + "\t" + args[0].toString());
+            public Object invoke(Object proxy, Method method, final Object[] args) throws Throwable {
                 // 1. invoke执行方法
                 //2. 根据返回值类型进行转换
+                Log.i(TAG, method.getName() + "\t,ReturnType:" + method.getGenericReturnType());
+
+                ServiceMethod serviceMethod = loadServiceMethod(method);
 
                 //获取该方法上的注解
                 GrpcAnnotaion annotation = method.getAnnotation(GrpcAnnotaion.class);
@@ -60,7 +69,7 @@ public class RPCMananger {
 
                 Method newBlockingStubMethod = aClass.getMethod(staticMethod, Channel.class);
                 //工厂方法 获取Channel
-                Object stub = newBlockingStubMethod.invoke(null, getChannel(baseUrl, headerFactory.createHeaders()));
+                final Object stub = newBlockingStubMethod.invoke(null, getChannel(baseUrl, headerFactory.createHeaders()));
 //                Log.i(TAG, "newBlockingStub:" + stub.getClass());
 
                 String methodName = annotation.methodName();
@@ -69,12 +78,32 @@ public class RPCMananger {
                     parameterTypes[i] = args[i].getClass();
 //                    Log.i(TAG, "parameterTypes:" + parameterTypes[i]);
                 }
-                Method realMethod = stub.getClass().getMethod(methodName, parameterTypes);
-                Log.i(TAG, "realMethod:" + realMethod.getName());
+                final Method realMethod = stub.getClass().getMethod(methodName, parameterTypes);
+                Log.i(TAG, "realMethod:" + realMethod.getName() + ",returnType:" + realMethod.getGenericReturnType());
 //                return realMethod.invoke(stub, args);
-                return "test";
+
+                return Observable.create(new ObservableOnSubscribe<UserResp>() {
+                    @Override
+                    public void subscribe(ObservableEmitter<UserResp> emitter) throws Exception {
+                        UserResp userResp = (UserResp) realMethod.invoke(stub, args);
+                        emitter.onNext(userResp);
+                    }
+                });
             }
         });
+    }
+
+
+    ServiceMethod loadServiceMethod(Method method) {
+        ServiceMethod result;
+        synchronized (serviceMethodCache) {
+            result = serviceMethodCache.get(method);
+            if (result == null) {
+                result = new ServiceMethod.Builder(this, method).build();
+                serviceMethodCache.put(method, result);
+            }
+        }
+        return result;
     }
 
     public static final class Builder {
