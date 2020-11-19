@@ -2,7 +2,7 @@ package demo.grpc.sample.core;
 
 /**
  * Description:
- * Author: kanjianxiong
+ * Author: KENO
  * Date : 2020/11/12 15:31
  **/
 public class RpcRequest {

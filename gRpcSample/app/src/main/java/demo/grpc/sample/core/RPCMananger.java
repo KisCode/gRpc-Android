@@ -1,28 +1,26 @@
 package demo.grpc.sample.core;
 
+import android.text.TextUtils;
 import android.util.Log;
 
+import java.lang.annotation.Annotation;
 import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.Method;
 import java.lang.reflect.Proxy;
-import java.util.HashMap;
+import java.lang.reflect.Type;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
 import demo.grpc.sample.annotation.GrpcAnnotaion;
 import demo.grpc.sample.interceptor.HeaderClientInterceptor;
-import grpc.sample.UserResp;
 import io.grpc.Channel;
 import io.grpc.ClientInterceptors;
 import io.grpc.ManagedChannel;
 import io.grpc.ManagedChannelBuilder;
-import io.reactivex.Observable;
-import io.reactivex.ObservableEmitter;
-import io.reactivex.ObservableOnSubscribe;
 
 /**
  * Description:
- * Author: kanjianxiong
+ * Author: KENO
  * Date : 2020/11/12 15:06
  **/
 public class RPCMananger {
@@ -31,10 +29,20 @@ public class RPCMananger {
 
     private String baseUrl;
     private HeaderFactory headerFactory;
+    private CallAdapter<?> callAdapter;
 
-    public RPCMananger(String baseUrl, HeaderFactory headerFactory) {
+    public RPCMananger(String baseUrl, HeaderFactory headerFactory, CallAdapter<?> callAdapter) {
         this.baseUrl = baseUrl;
         this.headerFactory = headerFactory;
+        this.callAdapter = callAdapter;
+    }
+
+    public String getBaseUrl() {
+        return baseUrl;
+    }
+
+    public HeaderFactory getHeaderFactory() {
+        return headerFactory;
     }
 
     @SuppressWarnings("unchecked")
@@ -55,7 +63,10 @@ public class RPCMananger {
                 Log.i(TAG, method.getName() + "\t,ReturnType:" + method.getGenericReturnType());
 
                 ServiceMethod serviceMethod = loadServiceMethod(method);
+                GrpcCall grpcCall = new GrpcCall(serviceMethod, args);
+                return serviceMethod.callAdapter.adapt(grpcCall);
 
+                /*
                 //获取该方法上的注解
                 GrpcAnnotaion annotation = method.getAnnotation(GrpcAnnotaion.class);
                 if (annotation == null) {
@@ -80,15 +91,15 @@ public class RPCMananger {
                 }
                 final Method realMethod = stub.getClass().getMethod(methodName, parameterTypes);
                 Log.i(TAG, "realMethod:" + realMethod.getName() + ",returnType:" + realMethod.getGenericReturnType());
-//                return realMethod.invoke(stub, args);
+                return realMethod.invoke(stub, args);*/
 
-                return Observable.create(new ObservableOnSubscribe<UserResp>() {
+                /*return Observable.create(new ObservableOnSubscribe<UserResp>() {
                     @Override
                     public void subscribe(ObservableEmitter<UserResp> emitter) throws Exception {
                         UserResp userResp = (UserResp) realMethod.invoke(stub, args);
                         emitter.onNext(userResp);
                     }
-                });
+                });*/
             }
         });
     }
@@ -106,9 +117,25 @@ public class RPCMananger {
         return result;
     }
 
+    public Channel getChannel(String baseUrl, Map<String, String> headers) {
+        ManagedChannel managedChannel = ManagedChannelBuilder.forTarget(baseUrl)
+                .useTransportSecurity()
+                .build();
+        //抽象方法
+        HeaderClientInterceptor headerClientInterceptor = new HeaderClientInterceptor(headers);
+        Channel channel = ClientInterceptors.intercept(managedChannel, headerClientInterceptor);
+        return channel;
+    }
+
+    public CallAdapter<?> callAdapter(Type returnType, Annotation[] annotations) {
+        return new RxCallAdapter<>();
+//        return nextCallAdapter(null, returnType, annotations);
+    }
+
     public static final class Builder {
         private String baseUrl;
         private HeaderFactory headerFactory;
+        private CallAdapter<?> callAdapter;
 
         public Builder setBaseUrl(String baseUrl) {
             this.baseUrl = baseUrl;
@@ -120,18 +147,25 @@ public class RPCMananger {
             return this;
         }
 
-        public RPCMananger build() {
-            return new RPCMananger(baseUrl, headerFactory);
+        public Builder setCallAdapter(CallAdapter<?> callAdapter) {
+            this.callAdapter = callAdapter;
+            return this;
         }
-    }
 
-    public Channel getChannel(String baseUrl, HashMap<String, String> headers) {
-        ManagedChannel managedChannel = ManagedChannelBuilder.forTarget(baseUrl)
-                .useTransportSecurity()
-                .build();
-        //抽象方法
-        HeaderClientInterceptor headerClientInterceptor = new HeaderClientInterceptor(headers);
-        Channel channel = ClientInterceptors.intercept(managedChannel, headerClientInterceptor);
-        return channel;
+        public RPCMananger build() {
+            if (TextUtils.isEmpty(baseUrl)) {
+                throw new IllegalArgumentException("Not set baseUrl");
+            }
+
+            if (headerFactory == null) {
+                //tips
+            }
+
+            if (callAdapter == null) {
+                //tips
+            }
+
+            return new RPCMananger(baseUrl, headerFactory, callAdapter);
+        }
     }
 } 

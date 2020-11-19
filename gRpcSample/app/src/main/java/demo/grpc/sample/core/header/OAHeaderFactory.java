@@ -32,6 +32,6 @@ public class OAHeaderFactory extends HeaderFactory {
 
     private String getOAToken() {
         //具体业务逻辑代码
-        return "Bearer xxxxyyyyyzzzzz";
+        return "Bearer eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJFZmIiLCJodHRwOi8vc2NoZW1hcy54bWxzb2FwLm9yZy93cy8yMDA1LzA1L2lkZW50aXR5L2NsYWltcy9uYW1lIjoid2VueGlhbmciLCJqdGkiOiJhNjc0NGYwNC03YWRiLTRjNTYtYmIwZS02MDkwOTBkOGM5YmUiLCJpYXQiOiIxNjA1NzY5NDkxIiwibmJmIjoxNjA1NzY5NDkxLCJleHAiOjE2MDU4MTI2OTEsImlzcyI6ImVmYi5ybGFpci5uZXQiLCJhdWQiOiJFZmIifQ.iZstVqUWJ3X7RhsTw9sUXtUojXXZHpLIl7a9kWGCBaLAO64C6LECHwy84uSk7EALy4Q2WSFLJ-gttYOhIdRb0aWTmMoXWkh6n-UsIHZu86pvqyOWZFSkJjWxMF-Ys4W4q_ARHJNnb9W3Zd6soiugimdlnyM-J7ZFLj9TK_lNEMFtEkfvbSVA0S0UdW-XROPqjC4XLKllbCVCX-uo3D4sKVSQBhBFapeRVucEeeNDFRYK_6Wa1yoVPbqAmP3_23slw_NVmEpQTAZIr4R3y8BBtPyt6ErDQaH2wJRfrBG_vIkGDyd7WQsbqPOi_nMS_ua1u4wubI87T3_knaD1AuPMJw";
     }
 }

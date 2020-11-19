@@ -1,6 +1,7 @@
 package demo.grpc.sample.core;
 
 
+import java.lang.annotation.Annotation;
 import java.lang.reflect.Method;
 import java.lang.reflect.Type;
 
@@ -13,6 +14,7 @@ import demo.grpc.sample.annotation.GrpcAnnotaion;
  */
 
 public class ServiceMethod<T> {
+    final RPCMananger rpcMananger;
     //方法返回值类型
     final Type responseType;
     //被注解方法
@@ -23,7 +25,11 @@ public class ServiceMethod<T> {
     //参数类型数组
     final Type[] parameterTypes;
 
+    CallAdapter<?> callAdapter;
+
     private ServiceMethod(Builder builder) {
+        this.rpcMananger = builder.rpcMananger;
+        this.callAdapter = builder.callAdapter;
         this.responseType = builder.responseType;
         this.method = builder.method;
         this.methodGrpcAnnotation = builder.methodGrpcAnnotation;
@@ -52,9 +58,7 @@ public class ServiceMethod<T> {
     }
 
     public static class Builder<T> {
-
-        //方法返回值类型
-        private Type responseType;
+        final RPCMananger rpcMananger;
         //被注解方法
         final Method method;
         //方法grpc注解
@@ -62,8 +66,12 @@ public class ServiceMethod<T> {
         //        final Annotation[][] parameterAnnotationsArray;
         //参数类型数组
         final Type[] parameterTypes;
+        //方法返回值类型
+        private Type responseType;
+        private CallAdapter<?> callAdapter;
 
         public Builder(RPCMananger rpcMananger, Method method) {
+            this.rpcMananger = rpcMananger;
             this.method = method;
             this.methodGrpcAnnotation = method.getAnnotation(GrpcAnnotaion.class);
             this.parameterTypes = method.getParameterTypes();
@@ -72,6 +80,8 @@ public class ServiceMethod<T> {
 
 
         public ServiceMethod build() {
+            callAdapter = createCallAdapter();
+
             if (methodGrpcAnnotation == null) {
 //                throw new IllegalArgumentException("方法未被GrpcAnnotaion注解");
                 throw new IllegalArgumentException("API method not found GrpcAnnotaion annotaion");
@@ -79,6 +89,27 @@ public class ServiceMethod<T> {
 
 
             return new ServiceMethod(this);
+        }
+
+        private CallAdapter<?> createCallAdapter() {
+            Type returnType = method.getGenericReturnType();
+            Annotation[] annotations = method.getAnnotations();
+//            if (Utils.hasUnresolvableType(returnType)) {
+//                throw methodError(
+//                        "Method return type must not include a type variable or wildcard: %s", returnType);
+//            }
+//            if (returnType == void.class) {
+//                throw methodError("Service methods cannot return void.");
+//            }
+//            try {
+//                return retrofit.callAdapter(returnType, annotations);
+//            } catch (RuntimeException e) { // Wide exception range because factories are user code.
+//                throw methodError(e, "Unable to create call adapter for %s", returnType);
+//            }
+
+            //
+            return rpcMananger.callAdapter(returnType, annotations);
+
         }
     }
 }
