@@ -1,7 +1,7 @@
 package demo.grpc.sample.core;
 
 
-import java.util.HashMap;
+import java.util.Map;
 
 /****
  * Description: 
@@ -10,5 +10,5 @@ import java.util.HashMap;
  */
 
 public abstract class HeaderFactory {
-    protected abstract HashMap<String, String> createHeaders();
+    protected abstract Map<String, String> createHeaders();
 }

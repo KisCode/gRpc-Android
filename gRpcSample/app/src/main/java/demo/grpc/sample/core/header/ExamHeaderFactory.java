@@ -2,6 +2,8 @@ package demo.grpc.sample.core.header;
 
 
 import java.util.HashMap;
+import java.util.LinkedHashMap;
+import java.util.Map;
 
 import demo.grpc.sample.core.HeaderFactory;
 
@@ -13,8 +15,8 @@ import demo.grpc.sample.core.HeaderFactory;
 
 public class ExamHeaderFactory extends HeaderFactory {
     @Override
-    protected HashMap<String, String> createHeaders() {
-        HashMap<String, String> headers = new HashMap<>();
+    protected Map<String, String> createHeaders() {
+        LinkedHashMap<String, String> headers = new LinkedHashMap<>();
         headers.put("token", getOAToken());
         return headers;
     }
