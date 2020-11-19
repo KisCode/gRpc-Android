@@ -4,7 +4,7 @@ import android.util.Log;
 
 import java.lang.reflect.Method;
 
-import demo.grpc.sample.annotation.GrpcAnnotaion;
+import demo.grpc.sample.core.annotation.GrpcAnnotaion;
 import io.grpc.Channel;
 
 /**

@@ -1,4 +1,4 @@
-package demo.grpc.sample.annotation;
+package demo.grpc.sample.core.annotation;
 
 /**
  * Description:

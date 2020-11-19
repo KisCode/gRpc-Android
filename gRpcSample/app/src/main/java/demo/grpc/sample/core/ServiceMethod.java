@@ -5,7 +5,7 @@ import java.lang.annotation.Annotation;
 import java.lang.reflect.Method;
 import java.lang.reflect.Type;
 
-import demo.grpc.sample.annotation.GrpcAnnotaion;
+import demo.grpc.sample.core.annotation.GrpcAnnotaion;
 
 /****
  * Description: 

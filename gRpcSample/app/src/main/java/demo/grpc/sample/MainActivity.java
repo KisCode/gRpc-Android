@@ -9,8 +9,7 @@ import androidx.appcompat.app.AppCompatActivity;
 
 import demo.grpc.sample.api.GRpcApi;
 import demo.grpc.sample.core.RPCMananger;
-import demo.grpc.sample.core.RpcRequest;
-import demo.grpc.sample.core.RxCallAdapter;
+import demo.grpc.sample.core.RxCallAdapterFactory;
 import demo.grpc.sample.core.header.OAHeaderFactory;
 import demo.grpc.sample.interceptor.HeaderClientInterceptor;
 import grpc.sample.UserReq;
@@ -263,33 +262,34 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         UserReq userReq = UserReq.newBuilder().setName("Android").build();
         //发起请求
 
+        RxCallAdapterFactory.create();
         RPCMananger rpcMananger = new RPCMananger.Builder()
                 .setBaseUrl("grpctest.test.rlair.net")
-                .setCallAdapter(new RxCallAdapter<>())
+                .addCallAdapterFactory(RxCallAdapterFactory.create())
                 .setHeaderFactory(OAHeaderFactory.create())
                 .build();
         GRpcApi gRpcApi = rpcMananger.create(GRpcApi.class);
 
-        UserResp userResp = gRpcApi.getUser(userReq);
-        Log.i(TAG, "success ：" + userResp.getName());
+/*        UserResp userResp = gRpcApi.getUser(userReq);
+        Log.i(TAG, "success ：" + userResp.getName());*/
 
 /*        String userString = gRpcApi.getUserString(userReq);
         Log.i(TAG, "userStrin ：" + userString)  ;*/
 
-//        Observable<UserResp> userObservable = gRpcApi.getUserObservable(userReq);
-//        userObservable.subscribeOn(Schedulers.io())
-//                .observeOn(AndroidSchedulers.mainThread())
-//                .subscribe(new Consumer<UserResp>() {
-//                    @Override
-//                    public void accept(UserResp userResp) throws Exception {
-//                        Log.i(TAG, "userStrin ：" + userResp.getName());
-//                    }
-//                }, new Consumer<Throwable>() {
-//                    @Override
-//                    public void accept(Throwable throwable) throws Exception {
-//                        Log.i(TAG, "throwable ：" + throwable.toString());
-//                    }
-//                });
+        Observable<UserResp> userObservable = gRpcApi.getUserObservable(userReq);
+        userObservable.subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe(new Consumer<UserResp>() {
+                    @Override
+                    public void accept(UserResp userResp) throws Exception {
+                        Log.i(TAG, "userStrin ：" + userResp.getName());
+                    }
+                }, new Consumer<Throwable>() {
+                    @Override
+                    public void accept(Throwable throwable) throws Exception {
+                        Log.i(TAG, "throwable ：" + throwable.toString());
+                    }
+                });
 
     }
 

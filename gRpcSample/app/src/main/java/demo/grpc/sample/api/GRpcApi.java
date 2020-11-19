@@ -1,7 +1,7 @@
 package demo.grpc.sample.api;
 
 
-import demo.grpc.sample.annotation.GrpcAnnotaion;
+import demo.grpc.sample.core.annotation.GrpcAnnotaion;
 import grpc.sample.UserReq;
 import grpc.sample.UserResp;
 import grpc.sample.UserServiceGrpc;

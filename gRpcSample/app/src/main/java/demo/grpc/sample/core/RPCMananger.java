@@ -8,15 +8,18 @@ import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.Method;
 import java.lang.reflect.Proxy;
 import java.lang.reflect.Type;
+import java.util.ArrayList;
 import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.Map;
 
-import demo.grpc.sample.annotation.GrpcAnnotaion;
 import demo.grpc.sample.interceptor.HeaderClientInterceptor;
+import grpc.sample.UserResp;
 import io.grpc.Channel;
 import io.grpc.ClientInterceptors;
 import io.grpc.ManagedChannel;
 import io.grpc.ManagedChannelBuilder;
+import io.reactivex.Observable;
 
 /**
  * Description:
@@ -29,12 +32,12 @@ public class RPCMananger {
 
     private String baseUrl;
     private HeaderFactory headerFactory;
-    private CallAdapter<?> callAdapter;
+    private List<CallAdapter.Factory> adapterFactories;
 
-    public RPCMananger(String baseUrl, HeaderFactory headerFactory, CallAdapter<?> callAdapter) {
+    public RPCMananger(String baseUrl, HeaderFactory headerFactory, List<CallAdapter.Factory> adapterFactories) {
         this.baseUrl = baseUrl;
         this.headerFactory = headerFactory;
-        this.callAdapter = callAdapter;
+        this.adapterFactories = adapterFactories;
     }
 
     public String getBaseUrl() {
@@ -93,7 +96,7 @@ public class RPCMananger {
                 Log.i(TAG, "realMethod:" + realMethod.getName() + ",returnType:" + realMethod.getGenericReturnType());
                 return realMethod.invoke(stub, args);*/
 
-                /*return Observable.create(new ObservableOnSubscribe<UserResp>() {
+            /*    return Observable.create(new ObservableOnSubscribe<UserResp>() {
                     @Override
                     public void subscribe(ObservableEmitter<UserResp> emitter) throws Exception {
                         UserResp userResp = (UserResp) realMethod.invoke(stub, args);
@@ -128,14 +131,25 @@ public class RPCMananger {
     }
 
     public CallAdapter<?> callAdapter(Type returnType, Annotation[] annotations) {
-        return new RxCallAdapter<>();
-//        return nextCallAdapter(null, returnType, annotations);
+//        return new RxCallAdapter<>();
+        return nextCallAdapter(returnType, annotations);
     }
+
+    private CallAdapter<?> nextCallAdapter(Type returnType, Annotation[] annotations) {
+        for (CallAdapter.Factory adapterFactory : adapterFactories) {
+            CallAdapter<?> callAdapter = adapterFactory.get(returnType);
+            if (callAdapter != null) {
+                return callAdapter;
+            }
+        }
+        throw new IllegalArgumentException("not Found CallAdapter");
+    }
+
 
     public static final class Builder {
         private String baseUrl;
         private HeaderFactory headerFactory;
-        private CallAdapter<?> callAdapter;
+        private List<CallAdapter.Factory> adapterFactories = new ArrayList<>();
 
         public Builder setBaseUrl(String baseUrl) {
             this.baseUrl = baseUrl;
@@ -147,8 +161,8 @@ public class RPCMananger {
             return this;
         }
 
-        public Builder setCallAdapter(CallAdapter<?> callAdapter) {
-            this.callAdapter = callAdapter;
+        public Builder addCallAdapterFactory(CallAdapter.Factory callAdapterFactory) {
+            adapterFactories.add(callAdapterFactory);
             return this;
         }
 
@@ -161,11 +175,7 @@ public class RPCMananger {
                 //tips
             }
 
-            if (callAdapter == null) {
-                //tips
-            }
-
-            return new RPCMananger(baseUrl, headerFactory, callAdapter);
+            return new RPCMananger(baseUrl, headerFactory, adapterFactories);
         }
     }
 } 
