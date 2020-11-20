@@ -1,8 +1,8 @@
-package demo.grpc.sample.annotation;
+package demo.grpc.sample.core.annotation;
 
 /**
  * Description:
- * Author: kanjianxiong
+ * Author: KENO
  * Date : 2020/11/13 10:12
  **/
 

@@ -9,7 +9,7 @@ import androidx.appcompat.app.AppCompatActivity;
 
 import demo.grpc.sample.api.GRpcApi;
 import demo.grpc.sample.core.RPCMananger;
-import demo.grpc.sample.core.RpcRequest;
+import demo.grpc.sample.core.RxCallAdapterFactory;
 import demo.grpc.sample.core.header.OAHeaderFactory;
 import demo.grpc.sample.interceptor.HeaderClientInterceptor;
 import grpc.sample.UserReq;
@@ -32,6 +32,7 @@ import io.reactivex.functions.Consumer;
 import io.reactivex.schedulers.Schedulers;
 import retrofit2.Retrofit;
 import retrofit2.adapter.rxjava.RxJavaCallAdapterFactory;
+import retrofit2.converter.gson.GsonConverterFactory;
 
 /***
  * https://github.com/xuexiangjys/Protobuf-gRPC-Android/blob/master/app/src/main/java/com/xuexiang/protobufdemo/grpc/HttpsUtils.java
@@ -194,39 +195,6 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         compositeDisposable.add(disposable);
     }
 
-    /***
-     * 授权登录，通过
-     */
-    private void requestAuthorizeRxjava2() {
-        UserReq userReq = UserReq.newBuilder().setName("Android").build();
-        Disposable disposable = RpcRequest.getUser(userReq)
-                .subscribeOn(Schedulers.io())
-                .observeOn(AndroidSchedulers.mainThread())
-                .subscribe(new Consumer<UserResp>() {
-                    @Override
-                    public void accept(UserResp userResp) {
-                        Log.i(TAG, "requestGRPC in:" + Thread.currentThread().getName());
-                        Log.i(TAG, userResp.getName() + "\t" + userResp.toString());
-                    }
-                }, new Consumer<Throwable>() {
-                    @Override
-                    public void accept(Throwable throwable) {
-                        Log.i(TAG, "requestGRPC in:" + Thread.currentThread().getName());
-                        if (throwable instanceof StatusRuntimeException) {
-                            Status status = ((StatusRuntimeException) throwable).getStatus();
-                            if (status.getCode() == Status.Code.UNAUTHENTICATED) {
-                                Log.i(TAG, "请求未授权：UNAUTHENTICATED");
-                            } else {
-                                Log.e(TAG, throwable.toString());
-                            }
-                        } else {
-                            Log.e(TAG, throwable.toString());
-                        }
-                    }
-                });
-        compositeDisposable.add(disposable);
-    }
-
     //异步访问
     private void requestAsycGRPC() {
         final ManagedChannel channel = ManagedChannelBuilder.forTarget("grpctest.keno.com")
@@ -290,57 +258,44 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         streamObserver.onCompleted();
     }
 
-    private void test() {/*
-        GRpcApi rpcRequest = (GRpcApi) Proxy.newProxyInstance(GRpcApi.class.getClassLoader(), new Class[]{GRpcApi.class}, new InvocationHandler() {
-            @Override
-            public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
-                Log.i(TAG, proxy.getClass() + "\t" + args.length + "\t" + args[0].toString());
-                // 1. invoke执行方法
-                //2. 根据返回值类型进行转换
-
-                //获取该方法上的注解
-                GrpcAnnotaion annotation = method.getAnnotation(GrpcAnnotaion.class);
-                Log.i(TAG, method.getName() + "\t" + annotation.className() + "." + annotation.methodName());
-
-                Class aClass = annotation.className();
-                String staticMethod = "newBlockingStub";
-                Method newBlockingStubMethod = aClass.getMethod(staticMethod, Channel.class);
-                Object stub = newBlockingStubMethod.invoke(null, RPCMananger.getChannel());
-                Log.i(TAG, "newBlockingStub:" + stub.getClass());
-
-                String methodName = annotation.methodName();
-                Class<?>[] parameterTypes = new Class<?>[args.length];
-                for (int i = 0; i < args.length; i++) {
-                    parameterTypes[i] = args[i].getClass();
-                    Log.i(TAG, "parameterTypes:" + parameterTypes[i]);
-                }
-                Method realMethod = stub.getClass().getMethod(methodName, parameterTypes);
-                Log.i(TAG, "realMethod:" + realMethod.getName());
-                return realMethod.invoke(stub, args);
-            }
-        });
-
-        UserReq userReq = UserReq.newBuilder().setName("Android").build();
-        UserResp userResp = rpcRequest.getUser(userReq);
-        Log.i(TAG, "success ：" + userResp.getName());*/
-
+    private void test() {
         //初始化请求参数
         UserReq userReq = UserReq.newBuilder().setName("Android").build();
         //发起请求
 
         RPCMananger rpcMananger = new RPCMananger.Builder()
-                .setBaseUrl("grpctest.keno.com")
+                .setBaseUrl("grpctest.test.rlair.net")
+                .addCallAdapterFactory(RxCallAdapterFactory.create())
                 .setHeaderFactory(OAHeaderFactory.create())
                 .build();
         GRpcApi gRpcApi = rpcMananger.create(GRpcApi.class);
-        UserResp userResp = gRpcApi.getUser(userReq);
-        Log.i(TAG, "success ：" + userResp.getName());
+
+//        UserResp userResp = gRpcApi.getUser(userReq);
+//        Log.i(TAG, "success ：" + userResp.getName());
+
+/*        String userString = gRpcApi.getUserString(userReq);
+        Log.i(TAG, "userStrin ：" + userString)  ;*/
+        Observable<UserResp> userObservable = gRpcApi.getUserObservable(userReq);
+        userObservable.subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe(new Consumer<UserResp>() {
+                    @Override
+                    public void accept(UserResp userResp) throws Exception {
+                        Log.i(TAG, "userStrin ：" + userResp.getName());
+                    }
+                }, new Consumer<Throwable>() {
+                    @Override
+                    public void accept(Throwable throwable) throws Exception {
+                        Log.i(TAG, "throwable ：" + throwable.toString());
+                    }
+                });
+
     }
 
     private void testRetrofit() {
         Retrofit retrofit = new Retrofit.Builder()
                 .baseUrl("http://fanyi.youdao.com/") //设置网络请求的Url地址
-//                .addConverterFactory(GsonConverterFactory.create()) //设置数据解析器
+                .addConverterFactory(GsonConverterFactory.create()) //设置数据解析器
                 .addCallAdapterFactory(RxJavaCallAdapterFactory.create())
                 .build();
 

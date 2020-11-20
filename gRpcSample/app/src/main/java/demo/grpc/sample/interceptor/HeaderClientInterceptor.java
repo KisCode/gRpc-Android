@@ -1,6 +1,7 @@
 package demo.grpc.sample.interceptor;
 
 import java.util.HashMap;
+import java.util.Map;
 
 import io.grpc.CallOptions;
 import io.grpc.Channel;
@@ -13,14 +14,14 @@ import io.grpc.MethodDescriptor;
 
 /**
  * Description:
- * Author: kanjianxiong
+ * Author: KENO
  * Date : 2020/11/11 14:52
  **/
 public class HeaderClientInterceptor implements ClientInterceptor {
 
-    private HashMap<String, String> mHeaderMap;
+    private Map<String, String> mHeaderMap;
 
-    public HeaderClientInterceptor(HashMap<String, String> header) {
+    public HeaderClientInterceptor(Map<String, String> header) {
         this.mHeaderMap = header;
     }
 
