@@ -48,6 +48,7 @@ public class RxCallAdapterFactory extends CallAdapter.Factory {
         Type observableType = getParameterUpperBound(0, (ParameterizedType) returnType);
         Class<?> rawObservableType = getRawType(observableType);
         Log.i("RxCallAdapterFactoryGet", observableType + "---" + rawObservableType);
-        return new RxCallAdapter<>(observableType);
+//        return new RxCallAdapter<?>(observableType);
+        return null;
     }
 }

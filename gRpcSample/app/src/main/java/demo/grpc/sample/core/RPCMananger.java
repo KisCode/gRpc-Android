@@ -14,12 +14,10 @@ import java.util.List;
 import java.util.Map;
 
 import demo.grpc.sample.interceptor.HeaderClientInterceptor;
-import grpc.sample.UserResp;
 import io.grpc.Channel;
 import io.grpc.ClientInterceptors;
 import io.grpc.ManagedChannel;
 import io.grpc.ManagedChannelBuilder;
-import io.reactivex.Observable;
 
 /**
  * Description:
@@ -49,7 +47,7 @@ public class RPCMananger {
     }
 
     @SuppressWarnings("unchecked")
-    public <T> T create(Class<T> service) {
+    public <T> T create(final Class<T> service) {
         if (!service.isInterface()) {
             throw new IllegalArgumentException("API declarations must be interfaces.");
         }
@@ -66,8 +64,9 @@ public class RPCMananger {
                 Log.i(TAG, method.getName() + "\t,ReturnType:" + method.getGenericReturnType());
 
                 ServiceMethod serviceMethod = loadServiceMethod(method);
-                GrpcCall grpcCall = new GrpcCall(serviceMethod, args);
-                return serviceMethod.callAdapter.adapt(grpcCall);
+                return serviceMethod.invoke(args);
+           /*     GrpcCall grpcCall = new GrpcCall(serviceMethod, args);
+                return serviceMethod.callAdapter.adapt(grpcCall);*/
 
                 /*
                 //获取该方法上的注解
@@ -120,6 +119,7 @@ public class RPCMananger {
         return result;
     }
 
+
     public Channel getChannel(String baseUrl, Map<String, String> headers) {
         ManagedChannel managedChannel = ManagedChannelBuilder.forTarget(baseUrl)
                 .useTransportSecurity()
@@ -131,8 +131,8 @@ public class RPCMananger {
     }
 
     public CallAdapter<?> callAdapter(Type returnType, Annotation[] annotations) {
-//        return new RxCallAdapter<>();
-        return nextCallAdapter(returnType, annotations);
+        return null; //todo
+//        return nextCallAdapter(returnType, annotations);
     }
 
     private CallAdapter<?> nextCallAdapter(Type returnType, Annotation[] annotations) {

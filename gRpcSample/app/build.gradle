@@ -59,6 +59,7 @@ dependencies {
     //下面两个是RxJava 和 RxAndroid
     implementation 'io.reactivex.rxjava2:rxandroid:2.1.0'
     implementation 'io.reactivex.rxjava2:rxjava:2.2.6'
+    implementation 'com.squareup.retrofit2:converter-gson:2.0.2'
     implementation 'com.squareup.retrofit2:retrofit:2.0.2'
     implementation 'com.squareup.retrofit2:adapter-rxjava:2.0.2'
 
