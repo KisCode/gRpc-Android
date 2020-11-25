@@ -1,2 +1,3 @@
+include ':grpcGo'
 include ':app'
 rootProject.name = "gRpcSample"

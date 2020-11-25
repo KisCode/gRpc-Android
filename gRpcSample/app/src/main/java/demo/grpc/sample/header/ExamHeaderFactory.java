@@ -1,11 +1,11 @@
-package demo.grpc.sample.core.header;
+package demo.grpc.sample.header;
 
 
-import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
-import demo.grpc.sample.core.HeaderFactory;
+import kiscode.grpcgo.HeaderFactory;
+
 
 /****
  * Description: 考试模块请求头工厂

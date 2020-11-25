@@ -1,4 +1,4 @@
-package demo.grpc.sample.core;
+package kiscode.grpcgo;
 
 import android.util.Log;
 
