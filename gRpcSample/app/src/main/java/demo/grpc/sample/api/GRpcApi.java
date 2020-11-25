@@ -1,11 +1,11 @@
 package demo.grpc.sample.api;
 
 
-import demo.grpc.sample.core.annotation.GrpcAnnotaion;
 import grpc.sample.UserReq;
 import grpc.sample.UserResp;
 import grpc.sample.UserServiceGrpc;
 import io.reactivex.Observable;
+import kiscode.grpcgo.annotation.GrpcAnnotaion;
 
 /****
  * Description: GRPC网络请求API

@@ -8,10 +8,7 @@ import android.widget.Toast;
 import androidx.appcompat.app.AppCompatActivity;
 
 import demo.grpc.sample.api.GRpcApi;
-import demo.grpc.sample.core.RPCMananger;
-import demo.grpc.sample.core.RxCallAdapterFactory;
-import demo.grpc.sample.core.header.OAHeaderFactory;
-import demo.grpc.sample.interceptor.HeaderClientInterceptor;
+import demo.grpc.sample.header.OAHeaderFactory;
 import grpc.sample.UserReq;
 import grpc.sample.UserResp;
 import grpc.sample.UserServiceGrpc;
@@ -30,16 +27,18 @@ import io.reactivex.disposables.CompositeDisposable;
 import io.reactivex.disposables.Disposable;
 import io.reactivex.functions.Consumer;
 import io.reactivex.schedulers.Schedulers;
-//import retrofit2.Retrofit;
-//import retrofit2.adapter.rxjava.RxJavaCallAdapterFactory;
-//import retrofit2.converter.gson.GsonConverterFactory;
+import kiscode.grpcgo.GrpcGo;
+import kiscode.grpcgo.HeaderClientInterceptor;
+import kiscode.grpcgo.RxCallAdapterFactory;
+import retrofit2.Retrofit;
+import retrofit2.adapter.rxjava.RxJavaCallAdapterFactory;
+import retrofit2.converter.gson.GsonConverterFactory;
 
 /***
  * https://github.com/xuexiangjys/Protobuf-gRPC-Android/blob/master/app/src/main/java/com/xuexiang/protobufdemo/grpc/HttpsUtils.java
  */
 public class MainActivity extends AppCompatActivity implements View.OnClickListener {
     private static final String TAG = "MainActivity";
-
 
     private CompositeDisposable compositeDisposable;
 
@@ -65,6 +64,8 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         findViewById(R.id.btn_request_authorize).setOnClickListener(this);
         findViewById(R.id.btn_request_signle_stream).setOnClickListener(this);
         findViewById(R.id.btn_request_authorize_rxjava).setOnClickListener(this);
+        findViewById(R.id.btn_request_grpcgo).setOnClickListener(this);
+        findViewById(R.id.btn_request_grpcgo_observable).setOnClickListener(this);
     }
 
     @Override
@@ -80,8 +81,13 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                 requestSingleStream();
                 break;
             case R.id.btn_request_authorize_rxjava:
-//                requestAuthorizeRxjava();
-                test();
+                requestAuthorizeRxjava();
+                break;
+            case R.id.btn_request_grpcgo:
+                testGrpcGo();
+                break;
+            case R.id.btn_request_grpcgo_observable:
+                testGrpcGoObservable();
                 break;
         }
     }
@@ -258,47 +264,56 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         streamObserver.onCompleted();
     }
 
-    private void test() {
+
+    private void testGrpcGo() {
+        GrpcGo grpcGo = new GrpcGo.Builder()
+                .baseUrl("grpctest.test.rlair.net")
+//                .setHeaderFactory(OAHeaderFactory.create())
+                .build();
+
+        GRpcApi gRpcApi = grpcGo.create(GRpcApi.class);
+
         //初始化请求参数
         UserReq userReq = UserReq.newBuilder().setName("Android").build();
-        //发起请求
+        UserResp userResp = gRpcApi.getUser(userReq);
+        Log.i(TAG, "getUser ：" + userResp.getName());
+    }
 
-        RPCMananger rpcMananger = new RPCMananger.Builder()
-                .setBaseUrl("grpctest.test.rlair.net")
+    private void testGrpcGoObservable() {
+        GrpcGo grpcGo = new GrpcGo.Builder()
+                .baseUrl("grpctest.test.rlair.net")
                 .addCallAdapterFactory(RxCallAdapterFactory.create())
                 .setHeaderFactory(OAHeaderFactory.create())
                 .build();
-        GRpcApi gRpcApi = rpcMananger.create(GRpcApi.class);
 
-//        UserResp userResp = gRpcApi.getUser(userReq);
-//        Log.i(TAG, "success ：" + userResp.getName());
+        GRpcApi gRpcApi = grpcGo.create(GRpcApi.class);
 
-/*        String userString = gRpcApi.getUserString(userReq);
-        Log.i(TAG, "userStrin ：" + userString)  ;*/
-        Observable<UserResp> userObservable = gRpcApi.getUserObservable(userReq);
-        userObservable.subscribeOn(Schedulers.io())
+        //初始化请求参数
+        UserReq userReq = UserReq.newBuilder().setName("Android").build();
+        gRpcApi.getUserObservable(userReq).subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(new Consumer<UserResp>() {
                     @Override
                     public void accept(UserResp userResp) throws Exception {
-                        Log.i(TAG, "userStrin ：" + userResp.getName());
+                        Log.i(TAG, "getUserObservable ：" + userResp.getName());
+                        Toast.makeText(MainActivity.this, "请求成功：" + userResp.getName(), Toast.LENGTH_SHORT).show();
                     }
                 }, new Consumer<Throwable>() {
                     @Override
                     public void accept(Throwable throwable) throws Exception {
-                        Log.i(TAG, "throwable ：" + throwable.toString());
+                        Log.i(TAG, "StatusRuntimeException ：" + throwable);
                     }
                 });
     }
 
     private void testRetrofit() {
-      /*  Retrofit retrofit = new Retrofit.Builder()
+        Retrofit retrofit = new Retrofit.Builder()
                 .baseUrl("http://fanyi.youdao.com/") //设置网络请求的Url地址
                 .addConverterFactory(GsonConverterFactory.create()) //设置数据解析器
                 .addCallAdapterFactory(RxJavaCallAdapterFactory.create())
                 .build();
 
-        retrofit.create(GRpcApi.class)
-                .getUser(null);*/
+//        retrofit.create(GRpcApi.class)
+//                .getUser(null);
     }
 }
