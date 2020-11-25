@@ -1,11 +1,16 @@
 package demo.grpc.sample.core;
 
 
+import android.util.Log;
+
 import java.lang.annotation.Annotation;
+import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.lang.reflect.Type;
 
 import demo.grpc.sample.core.annotation.GrpcAnnotaion;
+import io.grpc.Channel;
+import io.reactivex.Observable;
 
 /****
  * Description: 
@@ -14,6 +19,7 @@ import demo.grpc.sample.core.annotation.GrpcAnnotaion;
  */
 
 public class ServiceMethod<T> {
+    private static final String TAG = "ServiceMethod";
     final RPCMananger rpcMananger;
     //方法返回值类型
     final Type responseType;
@@ -36,24 +42,33 @@ public class ServiceMethod<T> {
         this.parameterTypes = builder.parameterTypes;
     }
 
-    private T invoke() throws NoSuchMethodException {
-        Class aClass = methodGrpcAnnotation.className();
-        String staticMethod = "newBlockingStub";
-//
-/*        Method newBlockingStubMethod = aClass.getMethod(staticMethod, Channel.class);
-        //工厂方法 获取Channel
-        final Object stub = newBlockingStubMethod.invoke(null, getChannel(baseUrl, headerFactory.createHeaders()));
-//                Log.i(TAG, "newBlockingStub:" + stub.getClass());
+    public T invoke(Object[] args) throws NoSuchMethodException, InvocationTargetException, IllegalAccessException {
+        Type decalairMethodReturnType = method.getGenericReturnType();
+        Log.i(TAG, "Method:" + method.getName() + ",returnType:" + decalairMethodReturnType);
 
-        String methodName = methodGrpcAnnotation.methodName();
+        GrpcAnnotaion annotation = methodGrpcAnnotation;
+        Class aClass = annotation.className();
+        String staticMethod = "newBlockingStub";
+        Channel channel = rpcMananger.getChannel(rpcMananger.getBaseUrl(), rpcMananger.getHeaderFactory().createHeaders());
+        //工厂方法 获取Channel
+        Method newBlockingStubMethod = aClass.getMethod(staticMethod, Channel.class);
+        final Object stub = newBlockingStubMethod.invoke(null, channel);
+        String methodName = annotation.methodName();
         Class<?>[] parameterTypes = new Class<?>[args.length];
         for (int i = 0; i < args.length; i++) {
             parameterTypes[i] = args[i].getClass();
-//                    Log.i(TAG, "parameterTypes:" + parameterTypes[i]);
         }
         final Method realMethod = stub.getClass().getMethod(methodName, parameterTypes);
         Log.i(TAG, "realMethod:" + realMethod.getName() + ",returnType:" + realMethod.getGenericReturnType());
-//                return realMethod.invoke(stub, args);*/
+        Object result = realMethod.invoke(stub, args);
+        Class type = realMethod.getGenericReturnType().getClass();
+        if (realMethod.getGenericReturnType() == method.getGenericReturnType()) {
+            //直接返回Response
+            return (T) realMethod.invoke(stub, args);
+        } else if (method.getGenericReturnType() instanceof Observable) {
+            //套接Observable
+
+        }
         return null;
     }
 

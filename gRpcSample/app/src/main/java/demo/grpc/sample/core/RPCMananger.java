@@ -14,12 +14,10 @@ import java.util.List;
 import java.util.Map;
 
 import demo.grpc.sample.interceptor.HeaderClientInterceptor;
-import grpc.sample.UserResp;
 import io.grpc.Channel;
 import io.grpc.ClientInterceptors;
 import io.grpc.ManagedChannel;
 import io.grpc.ManagedChannelBuilder;
-import io.reactivex.Observable;
 
 /**
  * Description:
@@ -49,7 +47,7 @@ public class RPCMananger {
     }
 
     @SuppressWarnings("unchecked")
-    public <T> T create(Class<T> service) {
+    public <T> T create(final Class<T> service) {
         if (!service.isInterface()) {
             throw new IllegalArgumentException("API declarations must be interfaces.");
         }
@@ -64,45 +62,9 @@ public class RPCMananger {
                 // 1. invoke执行方法
                 //2. 根据返回值类型进行转换
                 Log.i(TAG, method.getName() + "\t,ReturnType:" + method.getGenericReturnType());
-
                 ServiceMethod serviceMethod = loadServiceMethod(method);
                 GrpcCall grpcCall = new GrpcCall(serviceMethod, args);
                 return serviceMethod.callAdapter.adapt(grpcCall);
-
-                /*
-                //获取该方法上的注解
-                GrpcAnnotaion annotation = method.getAnnotation(GrpcAnnotaion.class);
-                if (annotation == null) {
-                    throw new IllegalAccessException("API method not found GrpcAnnotaion annotaion");
-                }
-
-//                Log.i(TAG, method.getName() + "\t" + annotation.className() + "." + annotation.methodName());
-
-                Class aClass = annotation.className();
-                String staticMethod = "newBlockingStub";
-
-                Method newBlockingStubMethod = aClass.getMethod(staticMethod, Channel.class);
-                //工厂方法 获取Channel
-                final Object stub = newBlockingStubMethod.invoke(null, getChannel(baseUrl, headerFactory.createHeaders()));
-//                Log.i(TAG, "newBlockingStub:" + stub.getClass());
-
-                String methodName = annotation.methodName();
-                Class<?>[] parameterTypes = new Class<?>[args.length];
-                for (int i = 0; i < args.length; i++) {
-                    parameterTypes[i] = args[i].getClass();
-//                    Log.i(TAG, "parameterTypes:" + parameterTypes[i]);
-                }
-                final Method realMethod = stub.getClass().getMethod(methodName, parameterTypes);
-                Log.i(TAG, "realMethod:" + realMethod.getName() + ",returnType:" + realMethod.getGenericReturnType());
-                return realMethod.invoke(stub, args);*/
-
-            /*    return Observable.create(new ObservableOnSubscribe<UserResp>() {
-                    @Override
-                    public void subscribe(ObservableEmitter<UserResp> emitter) throws Exception {
-                        UserResp userResp = (UserResp) realMethod.invoke(stub, args);
-                        emitter.onNext(userResp);
-                    }
-                });*/
             }
         });
     }
@@ -120,6 +82,7 @@ public class RPCMananger {
         return result;
     }
 
+
     public Channel getChannel(String baseUrl, Map<String, String> headers) {
         ManagedChannel managedChannel = ManagedChannelBuilder.forTarget(baseUrl)
                 .useTransportSecurity()
@@ -131,7 +94,6 @@ public class RPCMananger {
     }
 
     public CallAdapter<?> callAdapter(Type returnType, Annotation[] annotations) {
-//        return new RxCallAdapter<>();
         return nextCallAdapter(returnType, annotations);
     }
 
@@ -174,7 +136,6 @@ public class RPCMananger {
             if (headerFactory == null) {
                 //tips
             }
-
             return new RPCMananger(baseUrl, headerFactory, adapterFactories);
         }
     }
