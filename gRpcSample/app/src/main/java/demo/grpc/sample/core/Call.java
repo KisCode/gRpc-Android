@@ -6,5 +6,11 @@ package demo.grpc.sample.core;
  * Date : 2020/11/19 13:20
  **/
 public interface Call<T> {
-    T excute() throws Exception;
+    T execute() throws Exception;
+
+    /**
+     * Create a new, identical call to this one which can be enqueued or executed even if this call
+     * has already been.
+     */
+    Call<T> clone();
 }

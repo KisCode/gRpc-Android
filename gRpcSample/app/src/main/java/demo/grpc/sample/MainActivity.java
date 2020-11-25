@@ -30,9 +30,9 @@ import io.reactivex.disposables.CompositeDisposable;
 import io.reactivex.disposables.Disposable;
 import io.reactivex.functions.Consumer;
 import io.reactivex.schedulers.Schedulers;
-import retrofit2.Retrofit;
-import retrofit2.adapter.rxjava.RxJavaCallAdapterFactory;
-import retrofit2.converter.gson.GsonConverterFactory;
+//import retrofit2.Retrofit;
+//import retrofit2.adapter.rxjava.RxJavaCallAdapterFactory;
+//import retrofit2.converter.gson.GsonConverterFactory;
 
 /***
  * https://github.com/xuexiangjys/Protobuf-gRPC-Android/blob/master/app/src/main/java/com/xuexiang/protobufdemo/grpc/HttpsUtils.java
@@ -289,17 +289,16 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                         Log.i(TAG, "throwable ：" + throwable.toString());
                     }
                 });
-
     }
 
     private void testRetrofit() {
-        Retrofit retrofit = new Retrofit.Builder()
+      /*  Retrofit retrofit = new Retrofit.Builder()
                 .baseUrl("http://fanyi.youdao.com/") //设置网络请求的Url地址
                 .addConverterFactory(GsonConverterFactory.create()) //设置数据解析器
                 .addCallAdapterFactory(RxJavaCallAdapterFactory.create())
                 .build();
 
         retrofit.create(GRpcApi.class)
-                .getUser(null);
+                .getUser(null);*/
     }
 }

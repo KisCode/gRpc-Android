@@ -11,8 +11,6 @@ import java.lang.reflect.TypeVariable;
 import java.lang.reflect.WildcardType;
 import java.util.Arrays;
 import java.util.NoSuchElementException;
-import okhttp3.ResponseBody;
-import okio.Buffer;
 
 final class Utils {
   static final Type[] EMPTY_TYPE_ARRAY = new Type[0];
@@ -283,11 +281,6 @@ final class Utils {
     return false;
   }
 
-  static ResponseBody buffer(final ResponseBody body) throws IOException {
-    Buffer buffer = new Buffer();
-    body.source().readAll(buffer);
-    return ResponseBody.create(body.contentType(), body.contentLength(), buffer);
-  }
 
   static <T> void validateServiceInterface(Class<T> service) {
     if (!service.isInterface()) {
