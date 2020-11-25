@@ -1,4 +1,4 @@
-package demo.grpc.sample.interceptor;
+package kiscode.grpcgo;
 
 import java.util.HashMap;
 import java.util.Map;

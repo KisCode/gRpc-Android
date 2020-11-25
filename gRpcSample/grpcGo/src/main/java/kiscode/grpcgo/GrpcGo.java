@@ -1,7 +1,6 @@
-package demo.grpc.sample.core;
+package kiscode.grpcgo;
 
 import android.text.TextUtils;
-import android.util.Log;
 
 import java.lang.annotation.Annotation;
 import java.lang.reflect.InvocationHandler;
@@ -13,26 +12,20 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
-import demo.grpc.sample.interceptor.HeaderClientInterceptor;
-import io.grpc.Channel;
-import io.grpc.ClientInterceptors;
-import io.grpc.ManagedChannel;
-import io.grpc.ManagedChannelBuilder;
-
 /**
  * Description:
  * Author: KENO
  * Date : 2020/11/12 15:06
  **/
-public class RPCMananger {
-    private static final String TAG = "RPCMananger";
+public class GrpcGo {
+    private static final String TAG = "GrpcGo";
     private final Map<Method, ServiceMethod> serviceMethodCache = new LinkedHashMap<>();
 
     private String baseUrl;
     private HeaderFactory headerFactory;
     private List<CallAdapter.Factory> adapterFactories;
 
-    public RPCMananger(String baseUrl, HeaderFactory headerFactory, List<CallAdapter.Factory> adapterFactories) {
+    public GrpcGo(String baseUrl, HeaderFactory headerFactory, List<CallAdapter.Factory> adapterFactories) {
         this.baseUrl = baseUrl;
         this.headerFactory = headerFactory;
         this.adapterFactories = adapterFactories;
@@ -61,7 +54,6 @@ public class RPCMananger {
             public Object invoke(Object proxy, Method method, final Object[] args) throws Throwable {
                 // 1. invoke执行方法
                 //2. 根据返回值类型进行转换
-                Log.i(TAG, method.getName() + "\t,ReturnType:" + method.getGenericReturnType());
                 ServiceMethod serviceMethod = loadServiceMethod(method);
                 GrpcCall grpcCall = new GrpcCall(serviceMethod, args);
                 return serviceMethod.callAdapter.adapt(grpcCall);
@@ -82,17 +74,6 @@ public class RPCMananger {
         return result;
     }
 
-
-    public Channel getChannel(String baseUrl, Map<String, String> headers) {
-        ManagedChannel managedChannel = ManagedChannelBuilder.forTarget(baseUrl)
-                .useTransportSecurity()
-                .build();
-        //抽象方法
-        HeaderClientInterceptor headerClientInterceptor = new HeaderClientInterceptor(headers);
-        Channel channel = ClientInterceptors.intercept(managedChannel, headerClientInterceptor);
-        return channel;
-    }
-
     public CallAdapter<?> callAdapter(Type returnType, Annotation[] annotations) {
         return nextCallAdapter(returnType, annotations);
     }
@@ -104,7 +85,7 @@ public class RPCMananger {
                 return callAdapter;
             }
         }
-        throw new IllegalArgumentException("not Found CallAdapter");
+        throw new IllegalArgumentException("Not Found CallAdapter");
     }
 
 
@@ -113,7 +94,7 @@ public class RPCMananger {
         private HeaderFactory headerFactory;
         private List<CallAdapter.Factory> adapterFactories = new ArrayList<>();
 
-        public Builder setBaseUrl(String baseUrl) {
+        public Builder baseUrl(String baseUrl) {
             this.baseUrl = baseUrl;
             return this;
         }
@@ -128,15 +109,20 @@ public class RPCMananger {
             return this;
         }
 
-        public RPCMananger build() {
-            if (TextUtils.isEmpty(baseUrl)) {
+        public GrpcGo build() {
+            if (TextUtils.isEmpty(this.baseUrl)) {
                 throw new IllegalArgumentException("Not set baseUrl");
             }
 
             if (headerFactory == null) {
-                //tips
+                headerFactory = new DefaultHeaderClientInterceptor();
             }
-            return new RPCMananger(baseUrl, headerFactory, adapterFactories);
+
+            if (adapterFactories.isEmpty()) {
+                adapterFactories.add(DefaultCallAdapterFactory.create());
+            }
+
+            return new GrpcGo(baseUrl, headerFactory, adapterFactories);
         }
     }
 } 

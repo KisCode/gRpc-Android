@@ -1,4 +1,4 @@
-package demo.grpc.sample.core.annotation;
+package kiscode.grpcgo.annotation;
 
 /**
  * Description:
