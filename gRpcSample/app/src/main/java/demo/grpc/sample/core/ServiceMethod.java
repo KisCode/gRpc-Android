@@ -10,7 +10,7 @@ import java.lang.reflect.Type;
 
 import demo.grpc.sample.core.annotation.GrpcAnnotaion;
 import io.grpc.Channel;
-import rx.Observable;
+import io.reactivex.Observable;
 
 /****
  * Description: 

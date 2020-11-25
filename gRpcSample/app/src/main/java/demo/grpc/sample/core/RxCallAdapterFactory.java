@@ -5,7 +5,7 @@ import android.util.Log;
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
 
-import rx.Observable;
+import io.reactivex.Observable;
 
 
 /**
@@ -48,7 +48,6 @@ public class RxCallAdapterFactory extends CallAdapter.Factory {
         Type observableType = getParameterUpperBound(0, (ParameterizedType) returnType);
         Class<?> rawObservableType = getRawType(observableType);
         Log.i("RxCallAdapterFactoryGet", observableType + "---" + rawObservableType);
-//        return new RxCallAdapter<?>(observableType);
-        return null;
+        return new RxCallAdapter(observableType);
     }
 }

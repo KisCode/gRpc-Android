@@ -23,7 +23,7 @@ public class GrpcCall<T> implements Call<T> {
     }
 
     @Override
-    public T excute() throws Exception {
+    public T execute() throws Exception {
         //获取该方法上的注解
         GrpcAnnotaion annotation = serviceMethod.methodGrpcAnnotation;
         Class aClass = annotation.className();
@@ -39,6 +39,11 @@ public class GrpcCall<T> implements Call<T> {
         }
         final Method realMethod = stub.getClass().getMethod(methodName, parameterTypes);
         Log.i(TAG, "realMethod:" + realMethod.getName() + ",returnType:" + realMethod.getGenericReturnType());
-        return (T)realMethod.invoke(stub, args);
+        return (T) realMethod.invoke(stub, args);
+    }
+
+    @Override
+    public Call<T> clone() {
+        return new GrpcCall<>(serviceMethod, args);
     }
 }
