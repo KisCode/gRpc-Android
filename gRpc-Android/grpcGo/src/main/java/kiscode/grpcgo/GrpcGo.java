@@ -25,10 +25,10 @@ public class GrpcGo {
     private HeaderFactory headerFactory;
     private List<CallAdapter.Factory> adapterFactories;
 
-    public GrpcGo(String baseUrl, HeaderFactory headerFactory, List<CallAdapter.Factory> adapterFactories) {
-        this.baseUrl = baseUrl;
-        this.headerFactory = headerFactory;
-        this.adapterFactories = adapterFactories;
+    public GrpcGo(Builder builder) {
+        this.baseUrl = builder.baseUrl;
+        this.headerFactory = builder.headerFactory;
+        this.adapterFactories = builder.adapterFactories;
     }
 
     public String getBaseUrl() {
@@ -122,7 +122,7 @@ public class GrpcGo {
                 adapterFactories.add(DefaultCallAdapterFactory.create());
             }
 
-            return new GrpcGo(baseUrl, headerFactory, adapterFactories);
+            return new GrpcGo(this);
         }
     }
 } 
