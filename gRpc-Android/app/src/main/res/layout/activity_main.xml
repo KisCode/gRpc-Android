@@ -4,7 +4,7 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical"
-    tools:context=".MainActivity">
+    tools:context=".GrpcSampleActivity">
 
     <Button
         android:id="@+id/btn_request"
@@ -42,19 +42,4 @@
         android:layout_height="5dp"
         android:background="@color/colorPrimary" />
 
-    <Button
-        android:id="@+id/btn_request_grpcgo"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="10dp"
-        android:text="GrpcGo请求 返回对象"
-        android:textAllCaps="false" />
-
-    <Button
-        android:id="@+id/btn_request_grpcgo_observable"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="10dp"
-        android:text="GrpcGo请求 返回Observable"
-        android:textAllCaps="false" />
 </LinearLayout>

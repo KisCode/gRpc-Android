@@ -40,7 +40,7 @@ import retrofit2.converter.gson.GsonConverterFactory;
 /***
  * https://github.com/xuexiangjys/Protobuf-gRPC-Android/blob/master/app/src/main/java/com/xuexiang/protobufdemo/grpc/HttpsUtils.java
  */
-public class MainActivity extends AppCompatActivity implements View.OnClickListener {
+public class GrpcSampleActivity extends AppCompatActivity implements View.OnClickListener {
     private static final String TAG = "MainActivity";
 
     private CompositeDisposable compositeDisposable;
@@ -67,8 +67,6 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         findViewById(R.id.btn_request_authorize).setOnClickListener(this);
         findViewById(R.id.btn_request_signle_stream).setOnClickListener(this);
         findViewById(R.id.btn_request_authorize_rxjava).setOnClickListener(this);
-        findViewById(R.id.btn_request_grpcgo).setOnClickListener(this);
-        findViewById(R.id.btn_request_grpcgo_observable).setOnClickListener(this);
     }
 
     @Override
@@ -85,12 +83,6 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                 break;
             case R.id.btn_request_authorize_rxjava:
                 requestAuthorizeRxjava();
-                break;
-            case R.id.btn_request_grpcgo:
-                testGrpcGo();
-                break;
-            case R.id.btn_request_grpcgo_observable:
-                testGrpcGoObservable();
                 break;
         }
     }
@@ -240,7 +232,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             public void onNext(UserResp response) {
                 Log.i(TAG, "onNext in:" + Thread.currentThread().getName());
                 Log.i(TAG, response.getName() + "\t" + response.toString());
-                Toast.makeText(MainActivity.this, "onNext", Toast.LENGTH_LONG).show();
+                Toast.makeText(GrpcSampleActivity.this, "onNext", Toast.LENGTH_LONG).show();
             }
 
             @Override
@@ -323,7 +315,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                     @Override
                     public void accept(UserResp userResp) throws Exception {
                         Log.i(TAG, "getUserObservable ：" + userResp.getName());
-                        Toast.makeText(MainActivity.this, "请求成功：" + userResp.getName(), Toast.LENGTH_SHORT).show();
+                        Toast.makeText(GrpcSampleActivity.this, "请求成功：" + userResp.getName(), Toast.LENGTH_SHORT).show();
                     }
                 }, new Consumer<Throwable>() {
                     @Override
