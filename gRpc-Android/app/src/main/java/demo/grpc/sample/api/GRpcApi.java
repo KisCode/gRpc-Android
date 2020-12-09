@@ -14,16 +14,11 @@ import kiscode.grpcgo.annotation.GrpcAnnotaion;
  */
 
 public interface GRpcApi {
-
     @GrpcAnnotaion(className = UserServiceGrpc.class, methodName = "getUser")
     UserResp getUser(final UserReq userReq);
-
 
     @GrpcAnnotaion(className = UserServiceGrpc.class, methodName = "getUser")
     Observable<UserResp> getUserObservable(final UserReq userReq);
 
-
-    @GrpcAnnotaion(className = UserServiceGrpc.class, methodName = "getUser")
-    String getUserString(final UserReq userReq);
 }
 

@@ -1,0 +1,37 @@
+﻿syntax = "proto3";
+option csharp_namespace = "GrpcServer.Web.Protos";
+
+//是否运行生成多个java文件
+option java_multiple_files = true;
+option java_package = "grpc.sample";
+//生成的java类名字
+option java_outer_classname = "EmployeeProto";
+option objc_class_prefix = "HLW";
+
+package Employee;
+
+
+message Employee{
+	int32 id = 1;
+	int32 no = 2;
+	string firstName = 3;
+	string lastName = 4;
+}
+
+message GetByNoRequest{
+	int32 no = 1;
+}
+
+message GetAllRequest{
+
+}
+
+
+message EmployeeResponse{
+	Employee employee = 1;
+}
+
+service EmployeeService{
+	rpc GetByNo(GetByNoRequest) returns (EmployeeResponse);
+	rpc GetAll(GetAllRequest) returns (stream EmployeeResponse);
+}

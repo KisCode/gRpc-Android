@@ -9,6 +9,9 @@ import androidx.appcompat.app.AppCompatActivity;
 
 import demo.grpc.sample.api.GRpcApi;
 import demo.grpc.sample.header.OAHeaderFactory;
+import grpc.sample.EmployeeResponse;
+import grpc.sample.EmployeeServiceGrpc;
+import grpc.sample.GetByNoRequest;
 import grpc.sample.UserReq;
 import grpc.sample.UserResp;
 import grpc.sample.UserServiceGrpc;
@@ -96,10 +99,34 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         new Thread(new Runnable() {
             @Override
             public void run() {
-                ManagedChannel channel = ManagedChannelBuilder.forTarget("grpctest.keno.com")
-                        .useTransportSecurity()
+                ManagedChannel channel = ManagedChannelBuilder.forAddress("10.1.45.125", 5999)
+//                        .useTransportSecurity() //传输安全的
+                        .usePlaintext()
                         .build();
-                UserServiceGrpc.UserServiceBlockingStub stub = UserServiceGrpc.newBlockingStub(channel);
+//                EmployeeServiceGrpc.EmployeeServiceBlockingStub stub = EmployeeServiceGrpc.newBlockingStub(channel);
+//                EmployeeResponse employeeResponse = stub.getByNo(request);
+                EmployeeServiceGrpc.EmployeeServiceStub stub = EmployeeServiceGrpc.newStub(channel);
+                GetByNoRequest request = GetByNoRequest.newBuilder().setNo(100).build();
+                stub.getByNo(request, new StreamObserver<EmployeeResponse>() {
+                    @Override
+                    public void onNext(EmployeeResponse value) {
+                        Log.i(TAG, "requestGRPC in:" + value);
+                    }
+
+                    @Override
+                    public void onError(Throwable t) {
+                        Log.i(TAG, "onError :" + t);
+                    }
+
+                    @Override
+                    public void onCompleted() {
+
+                    }
+                });
+//                channel.shutdown();
+//                EmployeeOuterClass.GetByNoRequest request=new EmployeeOuterClass.GetByNoRequest();
+//                stub.getByNo()
+                /*UserServiceGrpc.UserServiceBlockingStub stub = UserServiceGrpc.newBlockingStub(channel);
                 UserReq userReq = UserReq.newBuilder().setName("Android").build();
                 try {
                     UserResp response = stub.getUser(userReq);
@@ -113,7 +140,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                     } else {
                         Log.e(TAG, ex.toString());
                     }
-                }
+                }*/
             }
         }).start();
     }
@@ -267,7 +294,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
     private void testGrpcGo() {
         GrpcGo grpcGo = new GrpcGo.Builder()
-                .baseUrl("grpctest.test.rlair.net")
+                .baseUrl(getString(R.string.host))
 //                .setHeaderFactory(OAHeaderFactory.create())
                 .build();
 
@@ -281,7 +308,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
     private void testGrpcGoObservable() {
         GrpcGo grpcGo = new GrpcGo.Builder()
-                .baseUrl("grpctest.test.rlair.net")
+                .baseUrl(getString(R.string.host))
                 .addCallAdapterFactory(RxCallAdapterFactory.create())
                 .setHeaderFactory(OAHeaderFactory.create())
                 .build();
