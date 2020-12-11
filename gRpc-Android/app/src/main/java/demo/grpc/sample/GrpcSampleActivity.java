@@ -1,11 +1,11 @@
 package demo.grpc.sample;
 
 import android.os.Bundle;
+import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.view.View;
 import android.widget.Toast;
 
-import androidx.appcompat.app.AppCompatActivity;
 
 import demo.grpc.sample.api.GRpcApi;
 import demo.grpc.sample.header.OAHeaderFactory;
@@ -115,27 +115,10 @@ public class GrpcSampleActivity extends AppCompatActivity implements View.OnClic
 
                     }
                 });
-//                channel.shutdown();
-//                EmployeeOuterClass.GetByNoRequest request=new EmployeeOuterClass.GetByNoRequest();
-//                stub.getByNo()
-                /*UserServiceGrpc.UserServiceBlockingStub stub = UserServiceGrpc.newBlockingStub(channel);
-                UserReq userReq = UserReq.newBuilder().setName("Android").build();
-                try {
-                    UserResp response = stub.getUser(userReq);
-                    Log.i(TAG, "requestGRPC in:" + Thread.currentThread().getName());
-                    Log.i(TAG, response.getName() + "\t" + response.toString());
-                } catch (StatusRuntimeException ex) {
-                    Log.i(TAG, "requestGRPC in:" + Thread.currentThread().getName());
-                    Status status = ex.getStatus();
-                    if (status.getCode() == Status.Code.UNAUTHENTICATED) {
-                        Log.i(TAG, "请求未授权：UNAUTHENTICATED");
-                    } else {
-                        Log.e(TAG, ex.toString());
-                    }
-                }*/
             }
         }).start();
     }
+
 
     /***
      * 授权登录，通过

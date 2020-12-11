@@ -1,0 +1,121 @@
+syntax = "proto3";
+package App;
+import "google/protobuf/timestamp.proto";
+
+//是否运行生成多个java文件
+option java_multiple_files = true;
+option java_package = "net.rlair.appmarket.grpc";
+////生成的java类名字
+//option java_outer_classname = "AppmarketService";
+//option objc_class_prefix = "Appmarket";
+
+
+message AppDeviceInfoSaveDto {
+  string appCode = 1;
+  int32 versionCode = 2;
+  string deviceId = 3;
+  string userAccount = 4;
+  string model = 5;
+  string manufacturer = 6;
+  EOsType osType = 7;
+}
+message AppLogSendDto {
+  string logCode = 1;
+  string appCode = 2;
+  int32 versionCode = 3;
+  string machineId = 4;
+  string userAccount = 5;
+  repeated AppLogSendInternalDtoDto appLogList = 6;
+}
+message AppLogSendInternalDtoDto {
+  string content = 1;
+  .google.protobuf.Timestamp eventCreateTime = 2;
+}
+message AppUpdateInfoQueryDto {
+  string guid = 1;
+  string account = 2;
+  EOsType eOsType = 3;
+  string appCode = 4;
+  int32 currentVersionCode = 5;
+}
+message AppUpdateInfoResultDto {
+  bool isForceUpdate = 1;
+  string versionName = 2;
+  int32 versionCode = 3;
+  string updateDes = 4;
+  string appStoreUrl = 5;
+}
+message AppVersionInfoQueryDto {
+  string appCode = 1;
+  EOsType osType = 2;
+}
+message AppVersionInfoResultDto {
+  .google.protobuf.Timestamp appUpdateTime = 1;
+  string appUpdateDescription = 2;
+  string appUpdateDescriptionEn = 3;
+  int32 versionCode = 4;
+  string versionName = 5;
+}
+message DeviceSaveDto {
+  string model = 1;
+  string manufacturer = 2;
+  string deviceId = 3;
+  string osVersion = 4;
+  string lastUserAccount = 5;
+  EOsType osType = 6;
+}
+enum EOsType {
+  ZERO = 0; // proto3 requires a zero value as the first item (it can be named anything)
+  Android = 1;
+  Ios = 2;
+  Mac = 3;
+  Windows32 = 4;
+  Windows64 = 5;
+  Linux = 6;
+}
+message EventLogSendDto {
+  string appCode = 1;
+  int32 versionCode = 2;
+  string deviceId = 3;
+  string userAccount = 4;
+  string model = 5;
+  string manufacturer = 6;
+  repeated EventLogSendInternalDto eventLogList = 7;
+  EOsType osType = 8;
+}
+message EventLogSendInternalDto {
+  string eventCode = 1;
+  .google.protobuf.Timestamp eventCreateTime = 2;
+}
+message GrpcResult_AppDeviceInfoSaveDto {
+  bool code = 1;
+  string msg = 2;
+  AppDeviceInfoSaveDto data = 3;
+}
+message GrpcResult_AppUpdateInfoResultDto {
+  bool code = 1;
+  string msg = 2;
+  AppUpdateInfoResultDto data = 3;
+}
+message GrpcResult_DeviceSaveDto {
+  bool code = 1;
+  string msg = 2;
+  DeviceSaveDto data = 3;
+}
+message GrpcResult_List_AppVersionInfoResultDto {
+  bool code = 1;
+  string msg = 2;
+  repeated AppVersionInfoResultDto data = 3;
+}
+message grpcResult {
+  bool code = 1;
+  string msg = 2;
+}
+service ExternalService {
+  rpc AppDeviceInfoSave (AppDeviceInfoSaveDto) returns (GrpcResult_AppDeviceInfoSaveDto);
+  rpc CreateOrUpdate (DeviceSaveDto) returns (GrpcResult_DeviceSaveDto);
+  rpc GetAppUpdateInfo (AppUpdateInfoQueryDto) returns (GrpcResult_AppUpdateInfoResultDto);
+  rpc GetAppVersionInfo (AppVersionInfoQueryDto) returns (GrpcResult_List_AppVersionInfoResultDto);
+  rpc SendAppEventLog (EventLogSendDto) returns (grpcResult);
+  rpc SendAppLog (AppLogSendDto) returns (grpcResult);
+}

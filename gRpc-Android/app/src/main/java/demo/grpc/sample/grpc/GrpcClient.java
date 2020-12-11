@@ -20,7 +20,7 @@ public class GrpcClient {
             instance = new GrpcGo.Builder()
                     .baseUrl(host)
                     .addCallAdapterFactory(RxCallAdapterFactory.create())
-                    .setHeaderFactory(OAHeaderFactory.create())
+//                    .setHeaderFactory(OAHeaderFactory.create())
                     .build();
             pools.put(host, instance);
         }
