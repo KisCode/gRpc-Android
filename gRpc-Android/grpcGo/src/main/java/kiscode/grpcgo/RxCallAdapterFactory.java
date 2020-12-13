@@ -34,11 +34,9 @@ public class RxCallAdapterFactory extends CallAdapter.Factory {
         boolean isCompletable = "rx.Completable".equals(canonicalName);
         Log.i("RxCallAdapterFactory", returnType + "---" + canonicalName + "---" + rawType);
 
-//        if (rawType != Observable.class && !isSingle && !isCompletable) {
-//            return null;
-//        }
-
-
+        if (rawType != Observable.class && !isSingle && !isCompletable) {
+            return null;
+        }
         CallAdapter<Observable<?>> callAdapter = getCallAdapter(returnType);
 
         return callAdapter;

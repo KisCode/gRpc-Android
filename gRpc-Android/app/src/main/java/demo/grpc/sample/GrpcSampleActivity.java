@@ -1,14 +1,17 @@
 package demo.grpc.sample;
 
 import android.os.Bundle;
+import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.view.View;
 import android.widget.Toast;
 
-import androidx.appcompat.app.AppCompatActivity;
 
 import demo.grpc.sample.api.GRpcApi;
 import demo.grpc.sample.header.OAHeaderFactory;
+import grpc.sample.EmployeeResponse;
+import grpc.sample.EmployeeServiceGrpc;
+import grpc.sample.GetByNoRequest;
 import grpc.sample.UserReq;
 import grpc.sample.UserResp;
 import grpc.sample.UserServiceGrpc;
@@ -37,7 +40,7 @@ import retrofit2.converter.gson.GsonConverterFactory;
 /***
  * https://github.com/xuexiangjys/Protobuf-gRPC-Android/blob/master/app/src/main/java/com/xuexiang/protobufdemo/grpc/HttpsUtils.java
  */
-public class MainActivity extends AppCompatActivity implements View.OnClickListener {
+public class GrpcSampleActivity extends AppCompatActivity implements View.OnClickListener {
     private static final String TAG = "MainActivity";
 
     private CompositeDisposable compositeDisposable;
@@ -64,8 +67,6 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         findViewById(R.id.btn_request_authorize).setOnClickListener(this);
         findViewById(R.id.btn_request_signle_stream).setOnClickListener(this);
         findViewById(R.id.btn_request_authorize_rxjava).setOnClickListener(this);
-        findViewById(R.id.btn_request_grpcgo).setOnClickListener(this);
-        findViewById(R.id.btn_request_grpcgo_observable).setOnClickListener(this);
     }
 
     @Override
@@ -83,12 +84,6 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             case R.id.btn_request_authorize_rxjava:
                 requestAuthorizeRxjava();
                 break;
-            case R.id.btn_request_grpcgo:
-                testGrpcGo();
-                break;
-            case R.id.btn_request_grpcgo_observable:
-                testGrpcGoObservable();
-                break;
         }
     }
 
@@ -96,27 +91,34 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         new Thread(new Runnable() {
             @Override
             public void run() {
-                ManagedChannel channel = ManagedChannelBuilder.forTarget("grpctest.keno.com")
-                        .useTransportSecurity()
+                ManagedChannel channel = ManagedChannelBuilder.forAddress("10.1.45.125", 5999)
+//                        .useTransportSecurity() //传输安全的
+                        .usePlaintext()
                         .build();
-                UserServiceGrpc.UserServiceBlockingStub stub = UserServiceGrpc.newBlockingStub(channel);
-                UserReq userReq = UserReq.newBuilder().setName("Android").build();
-                try {
-                    UserResp response = stub.getUser(userReq);
-                    Log.i(TAG, "requestGRPC in:" + Thread.currentThread().getName());
-                    Log.i(TAG, response.getName() + "\t" + response.toString());
-                } catch (StatusRuntimeException ex) {
-                    Log.i(TAG, "requestGRPC in:" + Thread.currentThread().getName());
-                    Status status = ex.getStatus();
-                    if (status.getCode() == Status.Code.UNAUTHENTICATED) {
-                        Log.i(TAG, "请求未授权：UNAUTHENTICATED");
-                    } else {
-                        Log.e(TAG, ex.toString());
+//                EmployeeServiceGrpc.EmployeeServiceBlockingStub stub = EmployeeServiceGrpc.newBlockingStub(channel);
+//                EmployeeResponse employeeResponse = stub.getByNo(request);
+                EmployeeServiceGrpc.EmployeeServiceStub stub = EmployeeServiceGrpc.newStub(channel);
+                GetByNoRequest request = GetByNoRequest.newBuilder().setNo(100).build();
+                stub.getByNo(request, new StreamObserver<EmployeeResponse>() {
+                    @Override
+                    public void onNext(EmployeeResponse value) {
+                        Log.i(TAG, "requestGRPC in:" + value);
                     }
-                }
+
+                    @Override
+                    public void onError(Throwable t) {
+                        Log.i(TAG, "onError :" + t);
+                    }
+
+                    @Override
+                    public void onCompleted() {
+
+                    }
+                });
             }
         }).start();
     }
+
 
     /***
      * 授权登录，通过
@@ -213,7 +215,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             public void onNext(UserResp response) {
                 Log.i(TAG, "onNext in:" + Thread.currentThread().getName());
                 Log.i(TAG, response.getName() + "\t" + response.toString());
-                Toast.makeText(MainActivity.this, "onNext", Toast.LENGTH_LONG).show();
+                Toast.makeText(GrpcSampleActivity.this, "onNext", Toast.LENGTH_LONG).show();
             }
 
             @Override
@@ -267,7 +269,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
     private void testGrpcGo() {
         GrpcGo grpcGo = new GrpcGo.Builder()
-                .baseUrl("grpctest.test.rlair.net")
+                .baseUrl(getString(R.string.host))
 //                .setHeaderFactory(OAHeaderFactory.create())
                 .build();
 
@@ -281,7 +283,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
     private void testGrpcGoObservable() {
         GrpcGo grpcGo = new GrpcGo.Builder()
-                .baseUrl("grpctest.test.rlair.net")
+                .baseUrl(getString(R.string.host))
                 .addCallAdapterFactory(RxCallAdapterFactory.create())
                 .setHeaderFactory(OAHeaderFactory.create())
                 .build();
@@ -296,7 +298,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                     @Override
                     public void accept(UserResp userResp) throws Exception {
                         Log.i(TAG, "getUserObservable ：" + userResp.getName());
-                        Toast.makeText(MainActivity.this, "请求成功：" + userResp.getName(), Toast.LENGTH_SHORT).show();
+                        Toast.makeText(GrpcSampleActivity.this, "请求成功：" + userResp.getName(), Toast.LENGTH_SHORT).show();
                     }
                 }, new Consumer<Throwable>() {
                     @Override

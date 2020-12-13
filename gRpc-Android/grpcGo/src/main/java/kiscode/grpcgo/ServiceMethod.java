@@ -1,6 +1,8 @@
 package kiscode.grpcgo;
 
 
+import android.util.Log;
+
 import java.lang.annotation.Annotation;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
@@ -62,6 +64,7 @@ public class ServiceMethod<T> {
             parameterTypes[i] = args[i].getClass();
         }
         final Method realMethod = stub.getClass().getMethod(methodName, parameterTypes);
+        Log.i(TAG, "realMethod:" + realMethod.getName() + ",returnType:" + realMethod.getGenericReturnType());
         return (T) realMethod.invoke(stub, args);
     }
 
@@ -71,7 +74,8 @@ public class ServiceMethod<T> {
 
     private Channel getChannel(String baseUrl, Map<String, String> headers) {
         ManagedChannel managedChannel = ManagedChannelBuilder.forTarget(baseUrl)
-                .useTransportSecurity()
+//                .useTransportSecurity()
+                .usePlaintext()
                 .build();
         //抽象方法
         HeaderClientInterceptor headerClientInterceptor = new HeaderClientInterceptor(headers);
@@ -108,8 +112,6 @@ public class ServiceMethod<T> {
 //                throw new IllegalArgumentException("方法未被GrpcAnnotaion注解");
                 throw new IllegalArgumentException("API method not found GrpcAnnotaion annotaion");
             }
-
-
             return new ServiceMethod(this);
         }
 
