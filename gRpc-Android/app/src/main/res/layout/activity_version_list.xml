@@ -3,11 +3,32 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context=".VersionListActivity">
+    android:orientation="vertical"
+    tools:context=".AppmarketActivity">
+
+    <Button
+        android:id="@+id/btn_save_device"
+        android:text="上传设备信息"
+        style="@style/style_button" />
 
     <Button
         android:id="@+id/btn_request_version"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:text="加载版本信息"/>
+        android:text="加载版本信息"
+        style="@style/style_button" />
+
+
+    <Button
+        android:id="@+id/btn_check_update"
+        style="@style/style_button"
+        android:text="检测更新" />
+
+    <Button
+        android:id="@+id/btn_save_event"
+        style="@style/style_button"
+        android:text="上传行为日志" />
+
+    <Button
+        android:id="@+id/btn_save_log"
+        style="@style/style_button"
+        android:text="上传异常日志" />
 </LinearLayout>

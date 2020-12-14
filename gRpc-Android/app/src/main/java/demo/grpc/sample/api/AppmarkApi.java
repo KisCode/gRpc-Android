@@ -1,6 +1,7 @@
 package demo.grpc.sample.api;
 
 import net.rlair.appmarket.grpc.AppDeviceInfoSaveDto;
+import net.rlair.appmarket.grpc.AppLogSendDto;
 import net.rlair.appmarket.grpc.AppUpdateInfoQueryDto;
 import net.rlair.appmarket.grpc.AppVersionInfoQueryDto;
 import net.rlair.appmarket.grpc.EventLogSendDto;
@@ -45,12 +46,20 @@ public interface AppmarkApi {
     Observable<GrpcResult_AppUpdateInfoResultDto> getAppUpdateInfo(final AppUpdateInfoQueryDto queryDto);
 
     /***
-     * 上传App日志信息
+     * 上传App用户行为日志信息
      * @param eventLog
      * @return
      */
     @GrpcAnnotaion(className = ExternalServiceGrpc.class, methodName = "sendAppEventLog")
     Observable<grpcResult> sendAppEventLog(final EventLogSendDto eventLog);
+
+    /***
+     * 上传异常日志信息
+     * @param eventLog
+     * @return
+     */
+    @GrpcAnnotaion(className = ExternalServiceGrpc.class, methodName = "sendAppLog")
+    Observable<grpcResult> sendAppLog(final AppLogSendDto eventLog);
 
 //    rpc AppDeviceInfoSave (AppDeviceInfoSaveDto) returns (GrpcResult_AppDeviceInfoSaveDto);
 //    rpc CreateOrUpdate (DeviceSaveDto) returns (GrpcResult_DeviceSaveDto);
