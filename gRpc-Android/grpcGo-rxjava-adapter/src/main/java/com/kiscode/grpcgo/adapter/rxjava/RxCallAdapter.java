@@ -1,4 +1,4 @@
-package kiscode.grpcgo;
+package com.kiscode.grpcgo.adapter.rxjava;
 
 import android.util.Log;
 
@@ -8,6 +8,8 @@ import java.lang.reflect.Type;
 import io.reactivex.Observable;
 import io.reactivex.ObservableEmitter;
 import io.reactivex.ObservableOnSubscribe;
+import kiscode.grpcgo.Call;
+import kiscode.grpcgo.CallAdapter;
 
 
 /**
