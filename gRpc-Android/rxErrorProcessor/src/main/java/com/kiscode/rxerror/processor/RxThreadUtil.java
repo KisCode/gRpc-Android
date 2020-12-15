@@ -1,4 +1,4 @@
-package kiscode.grpcgo.rx;
+package com.kiscode.rxerror.processor;
 
 import org.reactivestreams.Publisher;
 
@@ -16,7 +16,7 @@ import io.reactivex.schedulers.Schedulers;
 
 /**
  * Description:
- * Author: kanjianxiong
+ * Author: keno
  * Date : 2020/12/14 13:08
  **/
 public class RxThreadUtil {
