@@ -1,3 +1,5 @@
+include ':grpcGo-rxjava-adapter'//include ':grpcGo-rxjava-adapter'
+include ':rxErrorProcessor'
 include ':grpcGo'
 include ':app'
 rootProject.name = "gRpc-Android"
