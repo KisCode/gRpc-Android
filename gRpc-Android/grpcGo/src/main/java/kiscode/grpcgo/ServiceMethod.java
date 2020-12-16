@@ -21,7 +21,7 @@ import kiscode.grpcgo.annotation.GrpcAnnotaion;
  * CreateDate: 2020/11/17 21:46
  */
 
-public class ServiceMethod<T> {
+public final class ServiceMethod<T> {
     private static final String TAG = "ServiceMethod";
     final GrpcGo grpcGo;
     //方法返回值类型
@@ -65,7 +65,13 @@ public class ServiceMethod<T> {
         }
         final Method realMethod = stub.getClass().getMethod(methodName, parameterTypes);
         Log.i(TAG, "realMethod:" + realMethod.getName() + ",returnType:" + realMethod.getGenericReturnType());
-        return (T) realMethod.invoke(stub, args);
+
+        T result = (T) realMethod.invoke(stub, args);
+        if (channel instanceof ManagedChannel) {
+            //调用完成后关闭通道
+            ((ManagedChannel) channel).shutdown();
+        }
+        return result;
     }
 
     public Channel createChannel() {
@@ -74,8 +80,7 @@ public class ServiceMethod<T> {
 
     private Channel getChannel(String baseUrl, Map<String, String> headers) {
         ManagedChannel managedChannel = ManagedChannelBuilder.forTarget(baseUrl)
-//                .useTransportSecurity()
-                .usePlaintext()
+                .useTransportSecurity()
                 .build();
         //抽象方法
         HeaderClientInterceptor headerClientInterceptor = new HeaderClientInterceptor(headers);
@@ -104,7 +109,6 @@ public class ServiceMethod<T> {
             this.responseType = method.getGenericReturnType();
         }
 
-
         public ServiceMethod build() {
             callAdapter = createCallAdapter();
 
@@ -118,19 +122,34 @@ public class ServiceMethod<T> {
         private CallAdapter<?> createCallAdapter() {
             Type returnType = method.getGenericReturnType();
             Annotation[] annotations = method.getAnnotations();
-//            if (Utils.hasUnresolvableType(returnType)) {
-//                throw methodError(
-//                        "Method return type must not include a type variable or wildcard: %s", returnType);
-//            }
-//            if (returnType == void.class) {
-//                throw methodError("Service methods cannot return void.");
-//            }
-//            try {
-//                return retrofit.callAdapter(returnType, annotations);
-//            } catch (RuntimeException e) { // Wide exception range because factories are user code.
-//                throw methodError(e, "Unable to create call adapter for %s", returnType);
-//            }
-            return grpcGo.callAdapter(returnType, annotations);
+            if (Utils.hasUnresolvableType(returnType)) {
+                throw methodError(
+                        "Method return type must not include a type variable or wildcard: %s", returnType);
+            }
+            if (returnType == void.class) {
+                throw methodError("Service methods cannot return void.");
+            }
+
+            try {
+                return grpcGo.callAdapter(returnType, annotations);
+            } catch (RuntimeException e) {
+                // Wide exception range because factories are user code.
+                throw methodError(e, "Unable to create call adapter for %s", returnType);
+            }
+        }
+
+
+        private RuntimeException methodError(String message, Object... args) {
+            return methodError(null, message, args);
+        }
+
+        private RuntimeException methodError(Throwable cause, String message, Object... args) {
+            message = String.format(message, args);
+            return new IllegalArgumentException(message
+                    + "\n    for method "
+                    + method.getDeclaringClass().getSimpleName()
+                    + "."
+                    + method.getName(), cause);
         }
     }
 }

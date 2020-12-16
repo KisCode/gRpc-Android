@@ -13,7 +13,7 @@ public class DefaultCallAdapterFactory extends CallAdapter.Factory {
     }
 
     @Override
-    CallAdapter<?> get(Type returnType) {
+    protected CallAdapter<?> get(Type returnType) {
         return new DefaultCallAdapter();
     }
 }

@@ -12,8 +12,8 @@ import java.lang.reflect.Type;
 public interface CallAdapter<T> {
     <R> T adapt(Call<R> call) throws Exception;
 
-    abstract class Factory {
-        abstract CallAdapter<?> get(Type returnType);
+     abstract class Factory {
+        protected abstract CallAdapter<?> get(Type returnType);
         /**
          * Extract the upper bound of the generic parameter at {@code index} from {@code type}. For
          * example, index 1 of {@code Map<String, ? extends Runnable>} returns {@code Runnable}.

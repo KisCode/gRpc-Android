@@ -1,4 +1,4 @@
-package kiscode.grpcgo;
+package com.kiscode.grpcgo.adapter.rxjava;
 
 import android.util.Log;
 
@@ -6,6 +6,8 @@ import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
 
 import io.reactivex.Observable;
+import kiscode.grpcgo.CallAdapter;
+import kiscode.grpcgo.Utils;
 
 
 /**
@@ -30,16 +32,20 @@ public class RxCallAdapterFactory extends CallAdapter.Factory {
     public CallAdapter<?> get(Type returnType) {
         Class<?> rawType = getRawType(returnType);
         String canonicalName = rawType.getCanonicalName();
+/*
         boolean isSingle = "rx.Single".equals(canonicalName);
         boolean isCompletable = "rx.Completable".equals(canonicalName);
-        Log.i("RxCallAdapterFactory", returnType + "---" + canonicalName + "---" + rawType);
-
         if (rawType != Observable.class && !isSingle && !isCompletable) {
             return null;
         }
-        CallAdapter<Observable<?>> callAdapter = getCallAdapter(returnType);
+        */
 
-        return callAdapter;
+        Log.i("RxCallAdapterFactory", returnType + "---" + canonicalName + "---" + rawType);
+        //仅支持 Observable类型的返回值， Single、Completable后续完善
+        if (rawType != Observable.class) {
+            return null;
+        }
+        return getCallAdapter(returnType);
     }
 
     private CallAdapter<Observable<?>> getCallAdapter(Type returnType) {
