@@ -22,11 +22,16 @@ public class GrpcGo {
     private final Map<Method, ServiceMethod> serviceMethodCache = new LinkedHashMap<>();
 
     private String baseUrl;
+
+    //是否加密传输
+    private boolean useTransportSecurity;
+
     private HeaderFactory headerFactory;
     private List<CallAdapter.Factory> adapterFactories;
 
     public GrpcGo(Builder builder) {
         this.baseUrl = builder.baseUrl;
+        this.useTransportSecurity = builder.useTransportSecurity;
         this.headerFactory = builder.headerFactory;
         this.adapterFactories = builder.adapterFactories;
     }
@@ -34,6 +39,12 @@ public class GrpcGo {
     public String getBaseUrl() {
         return baseUrl;
     }
+
+
+    public boolean useTransportSecurity() {
+        return useTransportSecurity;
+    }
+
 
     public HeaderFactory getHeaderFactory() {
         return headerFactory;
@@ -91,11 +102,17 @@ public class GrpcGo {
 
     public static final class Builder {
         private String baseUrl;
+        private boolean useTransportSecurity;
         private HeaderFactory headerFactory;
         private List<CallAdapter.Factory> adapterFactories = new ArrayList<>();
 
         public Builder baseUrl(String baseUrl) {
             this.baseUrl = baseUrl;
+            return this;
+        }
+
+        public Builder useTransportSecurity(boolean useTransportSecurity) {
+            this.useTransportSecurity = useTransportSecurity;
             return this;
         }
 

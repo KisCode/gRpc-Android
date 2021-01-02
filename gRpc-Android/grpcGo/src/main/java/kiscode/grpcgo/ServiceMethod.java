@@ -35,6 +35,10 @@ public final class ServiceMethod<T> {
     final Type[] parameterTypes;
 
     final String baseUrl;
+
+    //
+    final boolean useTransportSecurity;
+
     final HeaderFactory headerFactory;
 
     CallAdapter<?> callAdapter;
@@ -47,6 +51,7 @@ public final class ServiceMethod<T> {
         this.methodGrpcAnnotation = builder.methodGrpcAnnotation;
         this.parameterTypes = builder.parameterTypes;
         this.baseUrl = builder.grpcGo.getBaseUrl();
+        this.useTransportSecurity = builder.grpcGo.useTransportSecurity();
         this.headerFactory = builder.grpcGo.getHeaderFactory();
     }
 
@@ -79,13 +84,15 @@ public final class ServiceMethod<T> {
     }
 
     private Channel getChannel(String baseUrl, Map<String, String> headers) {
-        ManagedChannel managedChannel = ManagedChannelBuilder.forTarget(baseUrl)
-                .useTransportSecurity()
-                .build();
+        ManagedChannelBuilder managedChannelBuilder = ManagedChannelBuilder.forTarget(baseUrl);
+        if (grpcGo.useTransportSecurity()) {
+            managedChannelBuilder.useTransportSecurity();
+        } else {
+            managedChannelBuilder.usePlaintext();
+        }
         //抽象方法
         HeaderClientInterceptor headerClientInterceptor = new HeaderClientInterceptor(headers);
-        Channel channel = ClientInterceptors.intercept(managedChannel, headerClientInterceptor);
-        return channel;
+        return ClientInterceptors.intercept(managedChannelBuilder.build(), headerClientInterceptor);
     }
 
     public static class Builder<T> {

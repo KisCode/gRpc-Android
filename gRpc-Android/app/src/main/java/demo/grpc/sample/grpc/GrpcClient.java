@@ -1,10 +1,10 @@
 package demo.grpc.sample.grpc;
 
+import com.kiscode.grpcgo.adapter.rxjava.RxCallAdapterFactory;
+
 import java.util.HashMap;
 
-import demo.grpc.sample.header.OAHeaderFactory;
 import kiscode.grpcgo.GrpcGo;
-import kiscode.grpcgo.RxCallAdapterFactory;
 
 /**
  * Description:
@@ -19,6 +19,7 @@ public class GrpcClient {
         if (instance == null) {
             instance = new GrpcGo.Builder()
                     .baseUrl(host)
+                    .useTransportSecurity(true)
                     .addCallAdapterFactory(RxCallAdapterFactory.create())
 //                    .setHeaderFactory(OAHeaderFactory.create())
                     .build();

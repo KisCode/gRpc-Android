@@ -28,10 +28,10 @@ dependencies {
     androidTestImplementation 'junit:junit:4.12'
 
     //gRpc
-    implementation 'io.grpc:grpc-okhttp:1.33.0'
-    implementation 'io.grpc:grpc-protobuf-lite:1.33.0'
-    implementation 'io.grpc:grpc-stub:1.33.0'
-    compileOnly 'org.apache.tomcat:annotations-api:6.0.53' // necessary for Java 9+
+    compileOnly 'io.grpc:grpc-okhttp:1.33.0'
+    compileOnly 'io.grpc:grpc-protobuf-lite:1.33.0'
+    compileOnly 'io.grpc:grpc-stub:1.33.0'
+//    compileOnly 'org.apache.tomcat:annotations-api:6.0.53' // necessary for Java 9+
 //    implementation 'javax.annotation:javax.annotation-api:1.2'
     
 //    //rxJava
